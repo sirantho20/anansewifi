@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Recent Auth Issues</h1>
+{% for row in rows %}
+  <div class="card">
+    <p><strong>{{ row.actor }}</strong> - {{ row.created_at }}</p>
+    <p>Action: {{ row.action }}</p>
+    <p>Details: {{ row.details }}</p>
+  </div>
+{% empty %}
+  <div class="card">No auth issues logged.</div>
+{% endfor %}
+{% endblock %}

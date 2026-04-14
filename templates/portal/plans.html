@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Available Plans</h1>
+<div class="row">
+  {% for plan in plans %}
+    <div class="card">
+      <h3>{{ plan.name }}</h3>
+      <p>{{ plan.description }}</p>
+      <p>Price: GHS {{ plan.price }}</p>
+      <p>Type: {{ plan.get_quota_type_display }}</p>
+      <p>Timeout: {{ plan.session_timeout_seconds }}s</p>
+      <form method="post" action="{% url 'portal:purchase-start' %}">
+        {% csrf_token %}
+        <input type="hidden" name="plan_id" value="{{ plan.id }}">
+        <label>Full Name</label>
+        <input type="text" name="full_name" placeholder="Enter your full name" required>
+        <label>Mobile Number</label>
+        <input type="text" name="mobile" placeholder="e.g. 0241234567" required>
+        <button type="submit">Buy Plan With Paystack</button>
+      </form>
+    </div>
+  {% empty %}
+    <div class="card">No plans available yet.</div>
+  {% endfor %}
+</div>
+{% endblock %}

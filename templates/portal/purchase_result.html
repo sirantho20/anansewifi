@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Purchase Successful</h1>
+<div class="card">
+  <p><strong>Name:</strong> {{ customer.full_name }}</p>
+  <p><strong>Mobile:</strong> {{ customer.phone }}</p>
+  <p><strong>Plan:</strong> {{ payment.plan.name }}</p>
+  <p><strong>Payment Reference:</strong> {{ payment.provider_reference }}</p>
+  {% if voucher %}
+    <p><strong>Your Voucher Code:</strong> {{ voucher.code }}</p>
+  {% else %}
+    <p>No voucher was created. Please contact support.</p>
+  {% endif %}
+  {% if sms_sent %}
+    <p>SMS sent to your phone successfully.</p>
+  {% else %}
+    <p>SMS delivery failed: {{ sms_error|default:"Unknown error" }}</p>
+  {% endif %}
+  <a href="{% url 'portal:login' %}?identity={{ login_identity|urlencode }}">
+    <button type="button">Go To Login Page</button>
+  </a>
+</div>
+{% endblock %}

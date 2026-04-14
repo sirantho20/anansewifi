@@ -1,0 +1,910 @@
+Build a Scalable Community WiFi Billing & Access Platform
+
+The objective of this project is to design and develop a fully controllable, locally deployable, and scalable WiFi billing and access management system that enables:
+
+monetization of internet access
+automated user authentication and session control
+flexible billing models (time, data, subscription)
+integration with MikroTik-based network infrastructure
+
+The system must operate independently of third-party cloud hotspot providers, while still supporting future integration with payment gateways and distributed deployments.
+
+🧠 CORE PURPOSE
+1. Enable Internet Monetization (Primary Business Goal)
+
+The system exists to turn internet bandwidth into a revenue-generating service.
+
+It allows you to:
+
+sell WiFi access (voucher, time-based, data-based)
+manage user access dynamically
+enforce bandwidth and session limits
+track usage for billing and analytics
+
+👉 In simple terms:
+
+Internet → Controlled Access → Paid Usage → Revenue
+2. Provide Full Ownership & Control
+
+Unlike cloud hotspot platforms, this system ensures:
+
+no vendor lock-in
+no recurring SaaS fees
+full customization capability
+local operation even with poor connectivity
+
+You control:
+
+pricing logic
+authentication rules
+payment integration
+data and analytics
+3. Bridge Network Infrastructure and Business Logic
+
+This project connects two traditionally separate domains:
+
+Network Layer (MikroTik / CHR)
+captive portal
+traffic control
+bandwidth shaping
+VLAN segmentation
+firewall and routing
+Business Layer (Django Platform)
+billing
+user management
+vouchers
+payments
+reporting
+
+👉 The system acts as a middleware intelligence layer between them.
+
+4. Create a Modular ISP/WISP Foundation
+
+This is not just a hotspot system — it is the foundation of a mini-ISP platform.
+
+It is designed to evolve into:
+
+multi-site WiFi deployments
+estate/community networks
+campus WiFi systems
+rural internet distribution
+reseller/agent-based distribution models
+5. Enable Real-Time Automated Access Control
+
+The system enforces real-time decisions based on user status.
+
+Example:
+
+User pays → system validates → access granted instantly
+User expires → system disconnects → access blocked
+
+This is achieved through:
+
+RADIUS authentication
+accounting updates
+session lifecycle control
+6. Support Flexible Billing Models
+
+The platform is designed to support multiple commercial models:
+
+✔ Voucher-based
+prepaid scratch cards
+agent-based distribution
+✔ Time-based
+hourly access
+daily plans
+✔ Data-based
+pay per GB
+✔ Subscription-based (future)
+monthly users
+recurring billing
+7. Enable Rapid Development and Testing
+
+The use of:
+
+Docker
+CHR (virtual MikroTik)
+local AP
+
+allows:
+
+fast iteration
+safe testing
+reproducible environments
+
+This ensures:
+
+Build → Test → Break → Fix → Repeat
+
+without impacting production.
+
+8. Lay Foundation for Automation & AI Integration
+
+The system is being designed for:
+
+API-first architecture
+automation via scripts and AI tools (Cursor)
+future predictive analytics
+intelligent bandwidth allocation
+9. Operate Reliably in Low-Infrastructure Environments
+
+The system is optimized for environments like:
+
+Ghana and similar markets
+areas with unstable internet
+locations requiring offline-first logic
+
+It can:
+
+run locally
+authenticate locally
+sync externally when needed
+🏗️ TECHNICAL PURPOSE
+The platform serves as:
+1. AAA System (Authentication, Authorization, Accounting)
+Authentication → Who are you?
+Authorization → What can you access?
+Accounting → What did you use?
+2. Policy Engine
+
+It defines:
+
+who gets access
+how long
+at what speed
+under what conditions
+3. Session Orchestrator
+
+Tracks:
+
+login
+usage
+expiration
+disconnection
+4. Data Platform
+
+Stores:
+
+usage data
+user behavior
+revenue data
+network activity
+🚀 STRATEGIC PURPOSE
+This project positions you to:
+✔ Launch a WiFi business quickly
+✔ Scale without relying on SaaS providers
+✔ Customize deeply for local market needs
+✔ Expand into a full ISP platform
+✔ Build intellectual property (your own system)
+🧠 SUMMARY (Simple Form)
+This project is about building your own internet billing engine.
+
+Instead of buying a system,
+you are building the system.
+
+It connects:
+WiFi users → network → billing → payment → access
+
+and gives you full control over the entire flow.
+🔥 My Perspective (Important)
+
+You are not just building:
+
+👉 “a hotspot system”
+
+You are building:
+
+👉 a telecom-grade access control and monetization platform
+
+That can evolve into:
+
+a WISP
+a SaaS product
+a multi-tenant platform
+or even your own “mini ISP cloud”
+
+
+It is written to help Cursor build a local-first hotspot billing platform for a Linux lab using:
+
+MikroTik CHR for router testing
+Docker Compose
+Django
+PostgreSQL
+FreeRADIUS
+Redis + Celery
+one Linux computer with 2 LAN ports
+
+I’ll first show the target lab design, then the actual prompt you can paste into Cursor.
+
+Target lab design
+
+Your Linux computer will run:
+
+Docker services for the billing platform
+CHR VM as the virtual MikroTik router
+LAN Port 1 for hotspot/AP side
+LAN Port 2 for management/uplink/testing as needed
+Recommended logical layout
+Linux Host
+├─ Docker Compose
+│  ├─ Django web
+│  ├─ PostgreSQL
+│  ├─ Redis
+│  ├─ Celery worker
+│  ├─ Celery beat
+│  ├─ FreeRADIUS
+│  └─ Nginx
+│
+├─ CHR VM
+│  ├─ ether1 = WAN/uplink or simulated ISP
+│  ├─ ether2 = hotspot/AP network
+│  └─ ether3 = management/backend network
+│
+├─ NIC1 = connected to real AP
+└─ NIC2 = management/internet/uplink
+Intended flow
+Phone/Laptop
+   │
+   ▼
+Real Access Point
+   │
+   ▼
+CHR Hotspot / Captive Portal
+   │
+   ├─ RADIUS auth/accounting → FreeRADIUS
+   ├─ portal/API calls → Django
+   └─ NAT/firewall/QoS/VLAN testing
+Cursor AI Master Prompt
+You are my senior software architect, senior Django engineer, senior network automation engineer, senior DevOps engineer, and senior product engineer.
+
+I want you to build a local-first MVP and scalable foundation for a community WiFi billing and captive portal platform. This system will be developed and tested in a Linux lab using Docker Compose and MikroTik CHR.
+
+You must design and generate a production-style codebase, but optimized for local development first.
+
+==================================================
+1. PROJECT CONTEXT
+==================================================
+
+I am building a community WiFi billing platform for hotspot internet resale.
+
+The lab environment is:
+
+- Linux computer
+- 2 LAN ports
+- MikroTik CHR for RouterOS testing
+- Real access point connected for client testing
+- Django-based billing system
+- Docker Compose for all app services
+
+The system should allow me to:
+- create WiFi plans
+- manage vouchers and users
+- integrate captive portal flow
+- authenticate users through RADIUS
+- track accounting and sessions
+- manage payments and entitlements
+- apply bandwidth profiles and time/data limits
+- support future integration with MikroTik API / REST API / SSH automation
+- support future multi-site and reseller workflows
+
+This first version is for a local lab but should be designed in a way that can scale later into production.
+
+==================================================
+2. LAB NETWORK ASSUMPTIONS
+==================================================
+
+Assume the following logical network model:
+
+- CHR ether1 = WAN or simulated ISP uplink
+- CHR ether2 = hotspot/client network connected to a real AP
+- CHR ether3 = backend/management network that can reach Docker services
+
+The Linux host runs:
+- Django app
+- PostgreSQL
+- Redis
+- Celery
+- FreeRADIUS
+- optional Nginx reverse proxy
+
+I want the app to support local development and testing with CHR in a repeatable loop:
+- update code
+- rebuild containers
+- test client portal via real AP
+- test RADIUS auth/accounting with CHR
+- inspect sessions and billing in admin UI
+
+==================================================
+3. CORE PRODUCT GOALS
+==================================================
+
+Build a hotspot billing and control platform with these capabilities:
+
+A. Billing / commercial
+- plans/packages
+- fixed-duration plans
+- fixed-data plans
+- unlimited-with-time-window plans
+- rate-limited profiles
+- vouchers
+- customer accounts
+- optional device-bound sessions by MAC
+- resellers/agents in future
+- receipts/payment records
+- promotions/coupon-ready design
+
+B. Authentication / network control
+- integrate with FreeRADIUS
+- support hotspot login via username/password
+- support voucher code login
+- support MAC-based remembered sessions
+- support session timeouts
+- support idle timeout
+- support accounting updates
+- support disconnect / session termination logic
+- prepare for MikroTik CoA / Disconnect support later if possible
+
+C. Portal / UX
+- responsive captive portal pages
+- plan selection screen
+- login page
+- voucher redemption page
+- session status page
+- expired package page
+- insufficient balance page
+- admin/staff UI
+- basic operator dashboard
+
+D. Back office / operations
+- package management
+- voucher generation
+- customer/session lookup
+- active sessions
+- disconnected sessions
+- RADIUS logs
+- accounting logs
+- AP/site inventory foundation
+- audit logs
+
+==================================================
+4. TECH STACK REQUIREMENTS
+==================================================
+
+Use the following stack:
+
+- Python 3.12
+- Django
+- Django REST Framework
+- PostgreSQL
+- Redis
+- Celery
+- FreeRADIUS in Docker
+- Nginx
+- Docker Compose
+- pytest
+- factory_boy or equivalent fixtures
+- black / isort / ruff
+- environment variables via .env
+- structured logging
+
+Frontend can initially use:
+- Django templates + HTMX or Alpine.js for simplicity
+or
+- a lightweight frontend approach that keeps iteration fast
+
+Choose the simplest architecture that is maintainable and fast to build.
+
+==================================================
+5. REQUIRED ARCHITECTURE
+==================================================
+
+Create a clean modular architecture.
+
+Use Django apps such as:
+- core
+- accounts
+- customers
+- plans
+- vouchers
+- payments
+- sessions
+- radius_integration
+- portal
+- network
+- audit
+- dashboard
+
+Recommended responsibilities:
+
+core:
+- shared base models
+- utilities
+- enums
+- timestamps
+- common services
+
+accounts:
+- staff/admin users
+- roles/permissions
+
+customers:
+- hotspot customers/end users
+- profile, phone, email, optional MAC associations
+
+plans:
+- package definitions
+- speed profiles
+- duration rules
+- data quotas
+- fair-use options
+- plan availability
+
+vouchers:
+- voucher batches
+- voucher generation
+- voucher redemption
+- expiry and usage states
+
+payments:
+- payment records
+- manual payment support initially
+- external gateway abstraction for future Paystack integration
+- webhook-ready design
+
+sessions:
+- active/inactive sessions
+- accounting snapshots
+- session usage tracking
+- entitlement consumption
+- disconnect logic
+- status calculations
+
+radius_integration:
+- FreeRADIUS integration helpers
+- schema or compatibility mapping
+- generation of radcheck/radreply/radacct compatible data if needed
+- sync logic between Django entities and RADIUS-facing tables
+
+portal:
+- captive pages
+- login workflows
+- session status pages
+- voucher redemption UX
+
+network:
+- NAS devices / routers / sites
+- future MikroTik API integration
+- RADIUS clients
+- site and AP abstractions
+
+audit:
+- admin actions
+- important state changes
+- access logs
+
+dashboard:
+- counts, KPIs, usage summaries
+
+==================================================
+6. DATA MODEL REQUIREMENTS
+==================================================
+
+Design robust models for at least the following entities:
+
+- Customer
+- Device / MAC binding
+- Plan
+- SpeedProfile
+- VoucherBatch
+- Voucher
+- Payment
+- Entitlement
+- Session
+- NASDevice
+- Site
+- RadiusClient
+- AccountingRecord
+- AuditLog
+
+Key model behavior:
+
+Plan:
+- name
+- code
+- price
+- billing_type: voucher, direct, manual
+- quota_type: duration, data, duration_and_data, unlimited
+- duration_minutes
+- data_bytes
+- up_rate_kbps
+- down_rate_kbps
+- concurrent_device_limit
+- idle_timeout_seconds
+- session_timeout_seconds
+- is_active
+
+Voucher:
+- code
+- plan
+- status
+- created_at
+- expires_at
+- redeemed_at
+- redeemed_by
+- batch
+- optional max_uses
+- optional bound_mac
+
+Entitlement:
+- owner (customer or voucher-derived identity)
+- plan
+- start_at
+- end_at
+- remaining_data_bytes
+- status
+- source_payment or source_voucher
+- activation rules
+
+Session:
+- customer
+- entitlement
+- username
+- mac_address
+- ip_address
+- nas
+- session_id
+- started_at
+- updated_at
+- ended_at
+- input_octets
+- output_octets
+- total_octets
+- duration_seconds
+- status
+- disconnect_reason
+
+AccountingRecord:
+- raw accounting fields
+- normalized fields
+- timestamps
+- links to session when possible
+
+==================================================
+7. AUTHENTICATION AND RADIUS REQUIREMENTS
+==================================================
+
+The system must be designed to work with MikroTik CHR hotspot + FreeRADIUS.
+
+I want:
+- FreeRADIUS container in Docker Compose
+- a clear strategy for integrating Django business logic with FreeRADIUS
+- one of these patterns may be used:
+  1. Django as source of truth and sync tables consumed by FreeRADIUS
+  2. Django writes to PostgreSQL tables used by FreeRADIUS directly
+  3. Django exposes auth logic in a way FreeRADIUS can use safely
+
+Choose the best practical local-lab architecture and explain why in docs.
+
+Implement support for:
+- Access-Accept / Reject logic
+- rate-limit reply attributes suitable for MikroTik
+- session timeout
+- idle timeout
+- accounting start/interim/stop ingestion
+- mapping sessions back to customers/vouchers/plans
+
+Prepare for MikroTik-compatible attributes such as:
+- Mikrotik-Rate-Limit
+- Session-Timeout
+- Idle-Timeout
+
+Do not fake this conceptually. Build a real foundation with working integration points.
+
+==================================================
+8. PORTAL WORKFLOW REQUIREMENTS
+==================================================
+
+Build captive portal pages and backend workflows for:
+
+1. Login with username/password
+2. Login with voucher code
+3. View available plans
+4. Buy/select plan placeholder flow
+5. Show active session / time remaining / data remaining
+6. Show expired package / redeem another voucher
+7. Optional remember device using MAC if policy allows
+
+Portal must be:
+- mobile friendly
+- simple
+- fast
+- clean
+- easy to customize
+
+==================================================
+9. ADMIN / OPERATOR REQUIREMENTS
+==================================================
+
+Provide an operator/admin interface for:
+
+- managing plans
+- generating voucher batches
+- viewing vouchers by state
+- searching customers
+- viewing sessions
+- viewing active users
+- viewing recent accounting updates
+- viewing failed logins / auth issues
+- viewing payments
+- basic dashboard metrics
+
+Prefer both:
+- Django admin for internal power use
+- custom operator UI for daily operations
+
+==================================================
+10. API REQUIREMENTS
+==================================================
+
+Build REST APIs for:
+- plans
+- voucher validation
+- voucher redemption
+- customer lookup
+- session lookup
+- dashboard summaries
+- NAS device registration/config stubs
+- future payment gateway hooks
+
+Use DRF with:
+- serializers
+- viewsets or APIViews where appropriate
+- permission classes
+- pagination
+- filtering
+
+==================================================
+11. DOCKER / DEVOPS REQUIREMENTS
+==================================================
+
+Create a working Docker Compose setup with at least:
+
+- web
+- db
+- redis
+- worker
+- beat
+- radius
+- nginx
+
+Requirements:
+- named volumes
+- healthchecks
+- env-based configuration
+- startup order
+- clear local dev commands
+- Makefile or task runner
+- easy rebuild workflow
+
+I want one command to bring up the system locally.
+
+Also provide:
+- seed/demo data
+- sample plans
+- sample vouchers
+- sample NAS device
+- sample customer
+
+==================================================
+12. TESTING REQUIREMENTS
+==================================================
+
+I want strong automated testing from the start.
+
+Implement:
+- unit tests for business rules
+- integration tests for voucher redemption
+- entitlement creation tests
+- session/accounting processing tests
+- API tests
+- portal flow tests if practical
+- fixtures for plans, vouchers, customers, sessions
+
+Also include:
+- sample RADIUS test flow strategy
+- how to simulate CHR auth requests in development
+- how to inspect logs and accounting records
+
+==================================================
+13. DOCUMENTATION REQUIREMENTS
+==================================================
+
+Create strong documentation in the repo:
+- README.md
+- docs/architecture.md
+- docs/data-model.md
+- docs/radius-flow.md
+- docs/docker-dev.md
+- docs/chr-lab-setup.md
+- docs/future-roadmap.md
+
+The docs must explain:
+- how the system works
+- how Django relates to FreeRADIUS
+- how CHR will connect
+- what interfaces/IPs are expected
+- how to run locally
+- how to test end-to-end
+
+==================================================
+14. CHR LAB SETUP REQUIREMENTS
+==================================================
+
+Provide documentation and config assumptions for CHR testing.
+
+Assume:
+- CHR ether1 = WAN
+- CHR ether2 = hotspot LAN to AP
+- CHR ether3 = backend network to Django/FreeRADIUS
+
+Document:
+- sample IP plan
+- sample hotspot subnet
+- sample management subnet
+- where RADIUS server lives
+- which ports/services are needed
+- how to test with a real AP
+- how to use one Linux host with 2 LAN ports
+
+Do not generate RouterOS scripts yet unless needed as examples, but make the platform ready for them.
+
+==================================================
+15. PRODUCT QUALITY REQUIREMENTS
+==================================================
+
+The code must be:
+- clean
+- modular
+- production-minded
+- typed where practical
+- well-commented where it matters
+- not overengineered
+- easy for future AI-assisted iteration
+
+Use service layers or domain services where helpful.
+Avoid cramming all business logic into Django views or models.
+Use explicit workflows for voucher redemption, entitlement activation, and session usage updates.
+
+==================================================
+16. DELIVERY STYLE
+==================================================
+
+I want you to build this project incrementally.
+
+Phase 1:
+- scaffold project
+- docker compose
+- core models
+- admin
+- basic docs
+
+Phase 2:
+- plans, vouchers, customers, entitlements
+- portal pages
+- REST APIs
+
+Phase 3:
+- FreeRADIUS integration foundation
+- accounting ingestion
+- session management
+
+Phase 4:
+- dashboards
+- operator UX
+- polishing
+- automated tests
+- docs refinement
+
+For each phase:
+- explain what files you will create
+- then create them
+- keep the app runnable
+- do not leave broken placeholders unless clearly marked
+- prefer working vertical slices over shallow scaffolding
+
+==================================================
+17. IMPORTANT IMPLEMENTATION RULES
+==================================================
+
+- Do not build a fake toy project
+- Do not skip Docker Compose
+- Do not skip FreeRADIUS integration architecture
+- Do not skip tests
+- Do not dump everything into one Django app
+- Do not rely on external paid services for the local MVP
+- Do not assume cloud captive portal services
+- Keep local development first, production-ready second
+- Use PostgreSQL, not SQLite
+- Use environment variables properly
+- Generate realistic sample data
+
+==================================================
+18. FIRST TASK
+==================================================
+
+Start by:
+1. defining the project structure
+2. creating the Docker Compose stack
+3. scaffolding Django project and apps
+4. creating initial models for core, plans, customers, vouchers, entitlements, sessions
+5. setting up PostgreSQL connection
+6. setting up Django admin
+7. writing the initial README and architecture docs
+
+Before writing code, briefly explain the chosen architecture and why it suits a CHR + Docker local lab.
+Then begin implementing Phase 1.
+How to use it in Cursor
+
+Paste that prompt into Cursor and then work in small passes:
+
+First pass
+
+Ask Cursor:
+
+Implement Phase 1 completely and keep the project runnable.
+Second pass
+Now implement Phase 2 with working voucher redemption and entitlement activation.
+Third pass
+Now implement FreeRADIUS integration foundation and document exactly how CHR should connect.
+Fourth pass
+Now add tests, demo data, and operator dashboard improvements.
+Extra prompt for RouterOS/CHR-readiness
+
+After Cursor builds the app scaffold, use this second prompt:
+
+Now review the project and prepare it specifically for MikroTik CHR hotspot integration.
+
+I need:
+- recommended IP plan for CHR lab
+- FreeRADIUS client config examples
+- Django-to-RADIUS data flow explanation
+- expected MikroTik attributes
+- local test scenarios
+- docs/chr-lab-setup.md completed
+- docs/radius-flow.md completed
+
+Do not generate production RouterOS config yet.
+Focus on making the Django + FreeRADIUS side accurate and testable.
+Practical advice
+
+For your first working version, push Cursor toward this architecture choice:
+
+Django as source of truth
+FreeRADIUS reads from PostgreSQL tables or synchronized auth tables
+CHR talks only to FreeRADIUS
+Django ingests accounting records and presents business logic/UI
+
+That is much cleaner than making CHR talk directly to Django for authentication.
+
+What you need on your Linux machine
+
+Minimum:
+
+Docker Engine
+Docker Compose plugin
+a VM platform for CHR
+2 LAN ports
+one real AP
+one test phone/laptop
+
+Recommended:
+
+VS Code or Cursor on the same machine
+Git
+Make
+Python only if you want host-side tooling too
+
+If you want, next I can write you:
+
+a second Cursor prompt specifically for the Docker Compose and Django repo scaffold, or
+a CHR lab network design with exact IP addresses and interface assignments.
