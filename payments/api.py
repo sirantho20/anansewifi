@@ -1,3 +1,4 @@
+from django.urls import reverse
 from rest_framework import permissions, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -29,10 +30,12 @@ class PurchaseInitializeView(APIView):
             return Response({"detail": "Plan not found."}, status=status.HTTP_404_NOT_FOUND)
 
         try:
+            callback_url = request.build_absolute_uri(reverse("portal:purchase-callback"))
             purchase = initialize_plan_purchase(
                 plan=plan,
                 full_name=payload["full_name"],
                 mobile=payload["mobile"],
+                callback_url=callback_url,
             )
         except PaymentProviderError as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)

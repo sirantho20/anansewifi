@@ -6,6 +6,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from http import HTTPStatus
 from urllib import error, parse, request
 
+import requests
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
@@ -80,28 +81,37 @@ class PaystackClient:
             "Authorization": f"Bearer {self.secret_key}",
             "Content-Type": "application/json",
         }
-        body = None
-        if payload is not None:
-            body = json.dumps(payload).encode("utf-8")
-        req = request.Request(
-            url=f"{self.base_url}{path}",
-            data=body,
-            method=method,
-            headers=headers,
-        )
+        url = f"{self.base_url}{path}"
+        timeout = 20
         try:
-            with request.urlopen(req, timeout=20) as response:
-                parsed = json.loads(response.read().decode("utf-8"))
-        except error.HTTPError as exc:
-            detail = exc.read().decode("utf-8").strip()
-            error_payload = self._parse_json_payload(detail)
+            if method.upper() == "POST":
+                response = requests.post(url, json=payload, headers=headers, timeout=timeout)
+            elif method.upper() == "GET":
+                response = requests.get(url, headers=headers, timeout=timeout)
+            else:
+                raise PaymentProviderError(f"Unsupported Paystack HTTP method: {method}")
+        except requests.RequestException as exc:
+            raise PaymentProviderError(f"Paystack connection failed: {exc}") from exc
+
+        parsed: dict | None = None
+        if response.content:
+            try:
+                body = response.json()
+            except ValueError:
+                body = None
+            parsed = body if isinstance(body, dict) else None
+
+        if not response.ok:
+            fallback = (
+                (response.text or "").strip()
+                or (str(parsed.get("message")) if isinstance(parsed, dict) and parsed.get("message") else "")
+                or f"Paystack HTTP error ({response.status_code})."
+            )
             raise self._build_error(
-                fallback_message=detail or f"Paystack HTTP error ({exc.code}).",
-                parsed_payload=error_payload,
-                http_status=exc.code,
-            ) from exc
-        except error.URLError as exc:
-            raise PaymentProviderError(f"Paystack connection failed: {exc.reason}") from exc
+                fallback_message=fallback,
+                parsed_payload=parsed,
+                http_status=response.status_code,
+            )
 
         if not isinstance(parsed, dict):
             raise PaymentProviderError("Unexpected Paystack response format.")
@@ -109,19 +119,9 @@ class PaystackClient:
             raise self._build_error(
                 fallback_message="Paystack request failed.",
                 parsed_payload=parsed,
-                http_status=None,
+                http_status=response.status_code,
             )
         return parsed["data"]
-
-    @staticmethod
-    def _parse_json_payload(raw_payload: str) -> dict | None:
-        if not raw_payload:
-            return None
-        try:
-            parsed = json.loads(raw_payload)
-        except json.JSONDecodeError:
-            return None
-        return parsed if isinstance(parsed, dict) else None
 
     @staticmethod
     def _build_error(
@@ -149,18 +149,19 @@ class PaystackClient:
         *,
         email: str,
         amount_pesewas: int,
-        reference: str,
         callback_url: str,
         metadata: dict,
+        reference: str | None = None,
     ) -> dict:
-        payload = {
+        payload: dict = {
             "email": email,
             "amount": amount_pesewas,
-            "reference": reference,
             "callback_url": callback_url,
             "currency": settings.PAYMENT_CURRENCY,
             "metadata": metadata,
         }
+        if reference:
+            payload["reference"] = reference
         return self._request("POST", "/transaction/initialize", payload=payload)
 
     def verify_transaction(self, reference: str) -> dict:
@@ -260,11 +261,6 @@ def _decimal_to_pesewas(amount: Decimal) -> int:
     return int((amount * Decimal("100")).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
 
-def _generate_reference() -> str:
-    token = timezone.now().strftime("%Y%m%d%H%M%S%f")
-    return f"ANW-{token}"
-
-
 def _generate_voucher_code() -> str:
     token = timezone.now().strftime("%y%m%d%H%M%S%f")[-10:]
     return f"ANW-PUR-{token}"
@@ -273,13 +269,19 @@ def _generate_voucher_code() -> str:
 def _build_customer_email(customer: Customer) -> str:
     if customer.email:
         return customer.email
-    return f"{customer.username}@anansewifi.local"
+    # Paystack rejects some synthetic TLDs (e.g. .local); use a reserved-domain placeholder.
+    return f"paystack+customer-{customer.pk}@example.com"
 
 
-def initialize_plan_purchase(*, plan: Plan, full_name: str, mobile: str) -> PurchaseInitialization:
+def initialize_plan_purchase(
+    *,
+    plan: Plan,
+    full_name: str,
+    mobile: str,
+    callback_url: str | None = None,
+) -> PurchaseInitialization:
     upsert_result = get_or_create_customer(full_name=full_name, mobile=mobile)
     customer = upsert_result.customer
-    reference = _generate_reference()
 
     payment = Payment.objects.create(
         customer=customer,
@@ -287,7 +289,7 @@ def initialize_plan_purchase(*, plan: Plan, full_name: str, mobile: str) -> Purc
         amount=plan.price,
         provider="paystack",
         status=PaymentStatus.PENDING,
-        provider_reference=reference,
+        provider_reference="",
         metadata={
             "full_name": customer.full_name,
             "mobile": customer.phone,
@@ -296,13 +298,14 @@ def initialize_plan_purchase(*, plan: Plan, full_name: str, mobile: str) -> Purc
         },
     )
 
+    effective_callback = (callback_url or "").strip() or settings.PAYSTACK_CALLBACK_URL
+
     paystack_client = PaystackClient()
     try:
         paystack_data = paystack_client.initialize_transaction(
             email=_build_customer_email(customer),
             amount_pesewas=_decimal_to_pesewas(plan.price),
-            reference=reference,
-            callback_url=settings.PAYSTACK_CALLBACK_URL,
+            callback_url=effective_callback,
             metadata={
                 "payment_id": str(payment.id),
                 "customer_id": str(customer.id),
@@ -325,25 +328,36 @@ def initialize_plan_purchase(*, plan: Plan, full_name: str, mobile: str) -> Purc
         logger.warning(
             "Paystack initialize failed payment_id=%s reference=%s error=%s",
             payment.id,
-            payment.provider_reference,
+            payment.provider_reference or "(unset)",
             str(exc),
         )
         raise
+
+    paystack_reference = str(paystack_data.get("reference") or "").strip()
+    if not paystack_reference:
+        payment.status = PaymentStatus.FAILED
+        metadata = payment.metadata or {}
+        metadata["initialize_error"] = "Paystack initialize response missing reference."
+        payment.metadata = metadata
+        payment.save(update_fields=["status", "metadata", "updated_at"])
+        raise PaymentProviderError("Paystack initialize response missing reference.")
 
     metadata = payment.metadata or {}
     metadata["paystack_initialize"] = {
         "access_code": paystack_data.get("access_code", ""),
         "authorization_url": paystack_data.get("authorization_url", ""),
+        "reference": paystack_reference,
     }
     payment.metadata = metadata
-    payment.save(update_fields=["metadata", "updated_at"])
+    payment.provider_reference = paystack_reference
+    payment.save(update_fields=["metadata", "provider_reference", "updated_at"])
 
     return PurchaseInitialization(
         customer=customer,
         payment=payment,
         authorization_url=paystack_data["authorization_url"],
         access_code=paystack_data.get("access_code", ""),
-        reference=reference,
+        reference=paystack_reference,
     )
 
 

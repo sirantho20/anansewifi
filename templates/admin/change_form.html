@@ -1,0 +1,10 @@
+{% extends "admin/change_form.html" %}
+{% block form_top %}
+{% if ecosystem_summary %}
+<div class="mb-4 rounded-lg border border-base-300 bg-base-200/50 p-4 text-sm text-base-content">
+  <div class="mb-2 font-semibold">How this fits in the platform</div>
+  <div class="space-y-2 leading-relaxed">{{ ecosystem_summary }}</div>
+</div>
+{% endif %}
+{{ block.super }}
+{% endblock %}

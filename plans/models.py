@@ -18,7 +18,6 @@ class QuotaType(models.TextChoices):
 
 class SpeedProfile(BaseModel):
     name = models.CharField(max_length=64, unique=True)
-    code = models.SlugField(max_length=64, unique=True)
     up_rate_kbps = models.PositiveIntegerField(default=1024)
     down_rate_kbps = models.PositiveIntegerField(default=1024)
     mikrotik_rate_limit = models.CharField(max_length=128, blank=True)
@@ -32,7 +31,6 @@ class SpeedProfile(BaseModel):
 
 class Plan(BaseModel):
     name = models.CharField(max_length=128)
-    code = models.SlugField(max_length=64, unique=True)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     billing_type = models.CharField(
@@ -63,4 +61,4 @@ class Plan(BaseModel):
         ordering = ["name"]
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.code})"
+        return f"{self.name} ({self.id})"

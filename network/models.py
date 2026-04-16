@@ -5,7 +5,6 @@ from core.models import BaseModel
 
 class Site(BaseModel):
     name = models.CharField(max_length=100)
-    code = models.SlugField(max_length=40, unique=True)
     hotspot_subnet = models.CharField(max_length=32, blank=True)
     management_subnet = models.CharField(max_length=32, blank=True)
     is_active = models.BooleanField(default=True)

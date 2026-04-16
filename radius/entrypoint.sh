@@ -27,4 +27,5 @@ render_template /opt/ananse-radius/clients.conf.template /etc/freeradius/clients
 render_template /opt/ananse-radius/sql.template /etc/freeradius/mods-enabled/sql
 cp /opt/ananse-radius/default.site /etc/freeradius/sites-enabled/default
 
-exec freeradius -X
+NS="${LOG_NAMESPACE:-base.radius}"
+freeradius -X 2>&1 | awk -v ns="$NS" '{print ns " | " $0}'

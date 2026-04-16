@@ -10,7 +10,14 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-insecure-key-change-me")
 DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
+_csrf_trusted = os.getenv(
+    "DJANGO_CSRF_TRUSTED_ORIGINS",
+    "http://127.0.0.1:8080,http://localhost:8080",
+)
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_trusted.split(",") if o.strip()]
+
 INSTALLED_APPS = [
+    "django_daisy",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -117,6 +124,14 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
+_log_ns = os.getenv("LOG_NAMESPACE", "base.django")
+CELERY_WORKER_LOG_FORMAT = (
+    f"[{_log_ns}] %(levelname)s/%(processName)s %(message)s"
+)
+CELERY_WORKER_TASK_LOG_FORMAT = (
+    f"[{_log_ns}] %(task_name)s[%(task_id)s]: %(message)s"
+)
+
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
@@ -133,15 +148,21 @@ REST_FRAMEWORK = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {
+        "log_namespace": {
+            "()": "core.log_filters.LogNamespaceFilter",
+        },
+    },
     "formatters": {
         "structured": {
-            "format": "%(asctime)s %(levelname)s %(name)s %(message)s"
+            "format": "%(asctime)s %(levelname)s [%(log_namespace)s] %(name)s %(message)s"
         }
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "structured",
+            "filters": ["log_namespace"],
         }
     },
     "root": {
@@ -164,3 +185,9 @@ HUBTEL_SMS_SEND_PATH = os.getenv("HUBTEL_SMS_SEND_PATH", "/v1/messages/send")
 HUBTEL_TIMEOUT_SECONDS = int(os.getenv("HUBTEL_TIMEOUT_SECONDS", "20"))
 
 RADIUS_ACCOUNTING_INGEST_TOKEN = os.getenv("RADIUS_ACCOUNTING_INGEST_TOKEN", "")
+
+DAISY_SETTINGS = {
+    "SITE_TITLE": "Ananse WiFi",
+    "SITE_HEADER": "Ananse WiFi administration",
+    "INDEX_TITLE": "Site administration",
+}

@@ -29,7 +29,6 @@ def test_purchase_callback_accepts_trxref_query_param(mock_verify_purchase, clie
     customer = CustomerFactory(username="buyer-portal", phone="+233241234567")
     plan = Plan.objects.create(
         name="Portal Plan",
-        code="portal-plan",
         price="5.00",
         billing_type="voucher",
         quota_type="duration",

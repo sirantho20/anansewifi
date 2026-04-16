@@ -1,8 +1,8 @@
 import base64
 import io
 import json
-from urllib.error import HTTPError
 from unittest.mock import Mock, patch
+from urllib.error import HTTPError
 
 import pytest
 from django.test import override_settings
@@ -26,6 +26,7 @@ def test_initialize_plan_purchase_creates_pending_payment(mock_initialize):
     mock_initialize.return_value = {
         "authorization_url": "https://paystack.test/checkout/ref",
         "access_code": "ACCESS-1",
+        "reference": "T211398129069938",
     }
 
     result = initialize_plan_purchase(
@@ -38,6 +39,8 @@ def test_initialize_plan_purchase_creates_pending_payment(mock_initialize):
     assert result.customer.phone == "+233241234567"
     assert payment.status == PaymentStatus.PENDING
     assert payment.provider == "paystack"
+    assert payment.provider_reference == "T211398129069938"
+    assert result.reference == "T211398129069938"
     assert result.authorization_url.startswith("https://paystack.test")
 
 
@@ -136,25 +139,27 @@ def test_initialize_plan_purchase_persists_structured_provider_error(mock_initia
 
 
 @override_settings(PAYSTACK_SECRET_KEY="sk_test_123")
-@patch("payments.services.request.urlopen")
-def test_paystack_client_parses_http_error_payload(mock_urlopen):
-    http_error = HTTPError(
-        url="https://api.paystack.co/transaction/initialize",
-        code=403,
-        msg="Forbidden",
-        hdrs=None,
-        fp=io.BytesIO(
-            b'{"status":false,"message":"Error occurred","type":"api_error","code":"1010","meta":{"nextStep":"Try again later"}}'
-        ),
-    )
-    mock_urlopen.side_effect = http_error
+@patch("payments.services.requests.post")
+def test_paystack_client_parses_http_error_payload(mock_post):
+    mock_response = Mock()
+    mock_response.ok = False
+    mock_response.status_code = 403
+    mock_response.content = b"{}"
+    mock_response.text = '{"status":false,"message":"Error occurred","type":"api_error","code":"1010","meta":{"nextStep":"Try again later"}}'
+    mock_response.json.return_value = {
+        "status": False,
+        "message": "Error occurred",
+        "type": "api_error",
+        "code": "1010",
+        "meta": {"nextStep": "Try again later"},
+    }
+    mock_post.return_value = mock_response
 
     client = PaystackClient()
     with pytest.raises(PaymentProviderError) as excinfo:
         client.initialize_transaction(
             email="buyer@example.com",
             amount_pesewas=500,
-            reference="ANW-REF-1",
             callback_url="http://localhost/callback",
             metadata={"probe": True},
         )

@@ -37,6 +37,7 @@ def test_purchase_initialize_api_returns_checkout_url(mock_initialize):
     mock_initialize.return_value = {
         "authorization_url": "https://paystack.test/checkout/abc",
         "access_code": "access-123",
+        "reference": "T211398129069938",
     }
 
     response = client.post(

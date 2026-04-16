@@ -17,7 +17,7 @@ if [ "${RUN_COLLECTSTATIC:-1}" = "1" ]; then
 fi
 
 if [ "$1" = "" ]; then
-  exec gunicorn ananseWifi.wsgi:application --bind 0.0.0.0:8000
+  exec gunicorn -c gunicorn.conf.py ananseWifi.wsgi:application
 fi
 
 exec "$@"

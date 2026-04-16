@@ -9,7 +9,6 @@ class PlanSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
-            "code",
             "description",
             "price",
             "billing_type",
@@ -27,4 +26,4 @@ class PlanViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Plan.objects.filter(is_active=True).select_related("speed_profile")
     serializer_class = PlanSerializer
     filterset_fields = ["billing_type", "quota_type"]
-    search_fields = ["name", "code"]
+    search_fields = ["name"]

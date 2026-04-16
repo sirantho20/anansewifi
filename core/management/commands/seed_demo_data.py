@@ -11,25 +11,27 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         speed_profile, _ = SpeedProfile.objects.get_or_create(
-            code="starter-speed",
+            name="Starter Speed",
             defaults={
-                "name": "Starter Speed",
                 "up_rate_kbps": 2048,
                 "down_rate_kbps": 4096,
                 "mikrotik_rate_limit": "2M/4M",
             },
         )
-        plan, _ = Plan.objects.get_or_create(
-            code="hourly-1gb",
-            defaults={
-                "name": "Hourly 1GB",
-                "description": "1 hour access with 1GB quota",
-                "price": 5.00,
-                "duration_minutes": 60,
-                "data_bytes": 1024 * 1024 * 1024,
-                "speed_profile": speed_profile,
-            },
-        )
+        plan = Plan.objects.filter(
+            name="Hourly 1GB",
+            price=5.00,
+            duration_minutes=60,
+        ).first()
+        if not plan:
+            plan = Plan.objects.create(
+                name="Hourly 1GB",
+                description="1 hour access with 1GB quota",
+                price=5.00,
+                duration_minutes=60,
+                data_bytes=1024 * 1024 * 1024,
+                speed_profile=speed_profile,
+            )
         customer, _ = Customer.objects.get_or_create(
             username="demo-customer",
             defaults={
@@ -38,14 +40,13 @@ class Command(BaseCommand):
                 "email": "demo@example.com",
             },
         )
-        site, _ = Site.objects.get_or_create(
-            code="lab-main",
-            defaults={
-                "name": "Lab Main Site",
-                "hotspot_subnet": "172.20.20.0/24",
-                "management_subnet": "172.20.30.0/24",
-            },
-        )
+        site = Site.objects.filter(name="Lab Main Site").first()
+        if not site:
+            site = Site.objects.create(
+                name="Lab Main Site",
+                hotspot_subnet="172.20.20.0/24",
+                management_subnet="172.20.30.0/24",
+            )
         NASDevice.objects.get_or_create(
             site=site,
             ip_address="172.20.20.1",

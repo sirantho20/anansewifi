@@ -13,14 +13,12 @@ class RadiusProjectionTests(TestCase):
     def test_sync_entitlement_projects_to_radcheck_and_radreply(self):
         speed_profile = SpeedProfile.objects.create(
             name="Starter",
-            code="starter",
             up_rate_kbps=1024,
             down_rate_kbps=2048,
             mikrotik_rate_limit="1M/2M",
         )
         plan = Plan.objects.create(
             name="Starter Plan",
-            code="starter-plan",
             price=5,
             duration_minutes=60,
             speed_profile=speed_profile,

@@ -47,7 +47,7 @@ class Entitlement(BaseModel):
 
     def __str__(self) -> str:
         owner = self.customer.username if self.customer else "voucher"
-        return f"{owner}:{self.plan.code}"
+        return f"{owner}:{self.plan_id}"
 
 
 class Session(BaseModel):

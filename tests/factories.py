@@ -10,7 +10,6 @@ class SpeedProfileFactory(factory.django.DjangoModelFactory):
         model = SpeedProfile
 
     name = factory.Sequence(lambda n: f"Speed {n}")
-    code = factory.Sequence(lambda n: f"speed-{n}")
     up_rate_kbps = 2048
     down_rate_kbps = 4096
     mikrotik_rate_limit = "2M/4M"
@@ -21,7 +20,6 @@ class PlanFactory(factory.django.DjangoModelFactory):
         model = Plan
 
     name = factory.Sequence(lambda n: f"Plan {n}")
-    code = factory.Sequence(lambda n: f"plan-{n}")
     price = 10
     duration_minutes = 60
     data_bytes = 1024 * 1024 * 1024

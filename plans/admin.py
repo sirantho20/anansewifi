@@ -1,16 +1,19 @@
 from django.contrib import admin
 
+from core.admin_ecosystem import EcosystemSummaryAdminMixin
+
 from .models import Plan, SpeedProfile
 
 
 @admin.register(SpeedProfile)
-class SpeedProfileAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "up_rate_kbps", "down_rate_kbps")
-    search_fields = ("name", "code")
+class SpeedProfileAdmin(EcosystemSummaryAdminMixin, admin.ModelAdmin):
+    list_display = ("name", "up_rate_kbps", "down_rate_kbps")
+    search_fields = ("name",)
 
 
 @admin.register(Plan)
-class PlanAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "price", "billing_type", "quota_type", "is_active")
+class PlanAdmin(EcosystemSummaryAdminMixin, admin.ModelAdmin):
+    list_display = ("name", "price", "billing_type", "quota_type", "is_active")
     list_filter = ("billing_type", "quota_type", "is_active")
-    search_fields = ("name", "code")
+    search_fields = ("name",)
+    autocomplete_fields = ("speed_profile",)

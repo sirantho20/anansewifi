@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from audit.models import AuditLog
 from customers.services import find_customer_by_identity
@@ -72,7 +73,13 @@ def purchase_start_view(request):
     mobile = request.POST.get("mobile", "").strip()
     plan = get_object_or_404(Plan, id=plan_id, is_active=True)
     try:
-        purchase = initialize_plan_purchase(plan=plan, full_name=full_name, mobile=mobile)
+        callback_url = request.build_absolute_uri(reverse("portal:purchase-callback"))
+        purchase = initialize_plan_purchase(
+            plan=plan,
+            full_name=full_name,
+            mobile=mobile,
+            callback_url=callback_url,
+        )
         AuditLog.objects.create(
             actor=purchase.customer.phone or purchase.customer.username,
             action="purchase_initialized",
