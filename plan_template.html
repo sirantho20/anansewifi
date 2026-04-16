@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plans</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B4513',
+                        accent: '#D2691E',
+                        success: '#16A34A',
+                        warning: '#F59E0B',
+                        error: '#DC2626',
+                        surface: '#FBF8F3',
+                        surfaceLight: '#FFFBF5',
+                        textPrimary: '#1F2937',
+                        textSecondary: '#6B7280',
+                        textTertiary: '#9CA3AF',
+                        border: '#E5E7EB',
+                        borderLight: '#F3F4F6'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>::-webkit-scrollbar { display: none;}</style>
+</head>
+<body class="bg-surface font-sans text-textPrimary">
+
+    <header id="header" class="bg-white border-b border-border sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 lg:h-20">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-spider text-white text-lg lg:text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl lg:text-2xl font-bold text-primary">Ananse WiFi</h1>
+                        <p class="text-xs text-textSecondary hidden sm:block">Community Internet Plans</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex items-center gap-6">
+                    <a href="#" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Home</a>
+                    <a href="#" class="text-sm font-medium text-primary border-b-2 border-primary pb-1">Plans</a>
+                    <a href="#" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Help</a>
+                </nav>
+                <div class="flex items-center gap-3">
+                    <button class="w-10 h-10 rounded-full bg-surfaceLight flex items-center justify-center hover:bg-border transition-colors">
+                        <i class="fa-regular fa-user text-textSecondary"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        
+        <section id="page-header" class="mb-8 lg:mb-12">
+            <div class="max-w-3xl">
+                <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-textPrimary mb-3 lg:mb-4">Choose Your Internet Plan</h2>
+                <p class="text-base lg:text-lg text-textSecondary leading-relaxed">Select the perfect prepaid Wi-Fi plan for your needs. Fast, reliable, and affordable internet for your community.</p>
+            </div>
+        </section>
+
+        <section id="messages-section" class="mb-8">
+            <div id="success-message" class="hidden bg-success/10 border-l-4 border-success rounded-lg p-4 lg:p-5 mb-4">
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-success flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-check text-white text-xs"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-success mb-1">Purchase Successful!</h3>
+                        <p class="text-sm text-textSecondary">Your plan has been activated. Check your mobile for confirmation details.</p>
+                    </div>
+                    <button onclick="document.getElementById('success-message').classList.add('hidden')" class="text-textTertiary hover:text-textSecondary">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="error-message" class="hidden bg-error/10 border-l-4 border-error rounded-lg p-4 lg:p-5 mb-4">
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-error flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-exclamation text-white text-xs"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-error mb-1">Payment Failed</h3>
+                        <p class="text-sm text-textSecondary">We couldn't process your payment. Please check your details and try again.</p>
+                    </div>
+                    <button onclick="document.getElementById('error-message').classList.add('hidden')" class="text-textTertiary hover:text-textSecondary">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="warning-message" class="hidden bg-warning/10 border-l-4 border-warning rounded-lg p-4 lg:p-5 mb-4">
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-warning flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-triangle-exclamation text-white text-xs"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-warning mb-1">Important Notice</h3>
+                        <p class="text-sm text-textSecondary">Some plans may have limited availability. Complete your purchase soon to secure your plan.</p>
+                    </div>
+                    <button onclick="document.getElementById('warning-message').classList.add('hidden')" class="text-textTertiary hover:text-textSecondary">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="plans-grid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8 mb-12">
+            
+            <article id="plan-card-1" class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-borderLight">
+                <div class="p-6 lg:p-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl lg:text-2xl font-bold text-textPrimary mb-2">Basic Starter</h3>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-4xl lg:text-5xl font-bold text-primary">GHS 15</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <i class="fa-solid fa-wifi text-primary text-xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 pb-6 border-b border-borderLight">
+                        <p class="text-textSecondary text-sm lg:text-base leading-relaxed mb-4">Perfect for light browsing and social media. Stay connected with family and friends without breaking the bank.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surfaceLight rounded-full text-xs font-medium text-textSecondary">
+                                <i class="fa-solid fa-database text-accent"></i>
+                                5GB Data
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surfaceLight rounded-full text-xs font-medium text-textSecondary">
+                                <i class="fa-solid fa-clock text-accent"></i>
+                                7 Days
+                            </span>
+                        </div>
+                    </div>
+
+                    <form action="/portal/purchase-start" method="POST" class="space-y-4">
+                        <input type="hidden" name="plan_id" value="basic-starter">
+                        <input type="hidden" name="csrf_token" value="{% csrf_token %}">
+                        
+                        <div>
+                            <label for="full_name_1" class="block text-sm font-medium text-textPrimary mb-2">Full Name</label>
+                            <input type="text" id="full_name_1" name="full_name" required class="w-full px-4 py-3 bg-surfaceLight border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-textPrimary placeholder-textTertiary transition-all" placeholder="Enter your full name">
+                        </div>
+
+                        <div>
+                            <label for="mobile_1" class="block text-sm font-medium text-textPrimary mb-2">Mobile Number</label>
+                            <input type="tel" id="mobile_1" name="mobile" required class="w-full px-4 py-3 bg-surfaceLight border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-textPrimary placeholder-textTertiary transition-all" placeholder="024 123 4567">
+                        </div>
+
+                        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md min-h-[52px]">
+                            <i class="fa-solid fa-lock"></i>
+                            Buy Plan With Paystack
+                        </button>
+                    </form>
+                </div>
+            </article>
+
+            <article id="plan-card-2" class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border-2 border-primary relative">
+                <div class="absolute top-0 right-0 bg-primary text-white px-4 py-1.5 rounded-bl-xl text-xs font-semibold">
+                    POPULAR
+                </div>
+                <div class="p-6 lg:p-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl lg:text-2xl font-bold text-textPrimary mb-2">Premium Plus</h3>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-4xl lg:text-5xl font-bold text-primary">GHS 50</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                            <i class="fa-solid fa-rocket text-white text-xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 pb-6 border-b border-borderLight">
+                        <p class="text-textSecondary text-sm lg:text-base leading-relaxed mb-4">Our most popular choice! Ideal for streaming, video calls, and heavy browsing. Enjoy fast speeds and generous data allowance for the whole month.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 rounded-full text-xs font-medium text-primary">
+                                <i class="fa-solid fa-database"></i>
+                                25GB Data
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 rounded-full text-xs font-medium text-primary">
+                                <i class="fa-solid fa-clock"></i>
+                                30 Days
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 rounded-full text-xs font-medium text-primary">
+                                <i class="fa-solid fa-gauge-high"></i>
+                                High Speed
+                            </span>
+                        </div>
+                    </div>
+
+                    <form action="/portal/purchase-start" method="POST" class="space-y-4">
+                        <input type="hidden" name="plan_id" value="premium-plus">
+                        <input type="hidden" name="csrf_token" value="{% csrf_token %}">
+                        
+                        <div>
+                            <label for="full_name_2" class="block text-sm font-medium text-textPrimary mb-2">Full Name</label>
+                            <input type="text" id="full_name_2" name="full_name" required class="w-full px-4 py-3 bg-surfaceLight border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-textPrimary placeholder-textTertiary transition-all" placeholder="Enter your full name">
+                        </div>
+
+                        <div>
+                            <label for="mobile_2" class="block text-sm font-medium text-textPrimary mb-2">Mobile Number</label>
+                            <input type="tel" id="mobile_2" name="mobile" required class="w-full px-4 py-3 bg-surfaceLight border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-textPrimary placeholder-textTertiary transition-all" placeholder="024 123 4567">
+                        </div>
+
+                        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg min-h-[52px]">
+                            <i class="fa-solid fa-lock"></i>
+                            Buy Plan With Paystack
+                        </button>
+                    </form>
+                </div>
+            </article>
+
+            <article id="plan-card-3" class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-borderLight">
+                <div class="p-6 lg:p-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl lg:text-2xl font-bold text-textPrimary mb-2">Ultra Unlimited</h3>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-4xl lg:text-5xl font-bold text-primary">GHS 120</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
+                            <i class="fa-solid fa-infinity text-accent text-xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 pb-6 border-b border-borderLight">
+                        <p class="text-textSecondary text-sm lg:text-base leading-relaxed mb-4">Maximum freedom for power users and families. Work from home, stream 4K content, and game online without limits. Our premium tier with priority support.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surfaceLight rounded-full text-xs font-medium text-textSecondary">
+                                <i class="fa-solid fa-database text-accent"></i>
+                                Unlimited Data
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surfaceLight rounded-full text-xs font-medium text-textSecondary">
+                                <i class="fa-solid fa-clock text-accent"></i>
+                                30 Days
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surfaceLight rounded-full text-xs font-medium text-textSecondary">
+                                <i class="fa-solid fa-star text-accent"></i>
+                                Priority Support
+                            </span>
+                        </div>
+                    </div>
+
+                    <form action="/portal/purchase-start" method="POST" class="space-y-4">
+                        <input type="hidden" name="plan_id" value="ultra-unlimited">
+                        <input type="hidden" name="csrf_token" value="{% csrf_token %}">
+                        
+                        <div>
+                            <label for="full_name_3" class="block text-sm font-medium text-textPrimary mb-2">Full Name</label>
+                            <input type="text" id="full_name_3" name="full_name" required class="w-full px-4 py-3 bg-surfaceLight border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-textPrimary placeholder-textTertiary transition-all" placeholder="Enter your full name">
+                        </div>
+
+                        <div>
+                            <label for="mobile_3" class="block text-sm font-medium text-textPrimary mb-2">Mobile Number</label>
+                            <input type="tel" id="mobile_3" name="mobile" required class="w-full px-4 py-3 bg-surfaceLight border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-textPrimary placeholder-textTertiary transition-all" placeholder="024 123 4567">
+                        </div>
+
+                        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md min-h-[52px]">
+                            <i class="fa-solid fa-lock"></i>
+                            Buy Plan With Paystack
+                        </button>
+                    </form>
+                </div>
+            </article>
+
+            <article id="plan-card-4" class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-borderLight">
+                <div class="p-6 lg:p-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl lg:text-2xl font-bold text-textPrimary mb-2">Student Special</h3>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-4xl lg:text-5xl font-bold text-primary">GHS 30</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <i class="fa-solid fa-graduation-cap text-primary text-xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 pb-6 border-b border-borderLight">
+                        <p class="text-textSecondary text-sm lg:text-base leading-relaxed mb-4">Designed for students and learners. Access educational resources, attend online classes, and complete assignments with reliable connectivity at an affordable price.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surfaceLight rounded-full text-xs font-medium text-textSecondary">
+                                <i class="fa-solid fa-database text-accent"></i>
+                                15GB Data
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surfaceLight rounded-full text-xs font-medium text-textSecondary">
+                                <i class="fa-solid fa-clock text-accent"></i>
+                                30 Days
+                            </span>
+                        </div>
+                    </div>
+
+                    <form action="/portal/purchase-start" method="POST" class="space-y-4">
+                        <input type="hidden" name="plan_id" value="student-special">
+                        <input type="hidden" name="csrf_token" value="{% csrf_token %}">
+                        
+                        <div>
+                            <label for="full_name_4" class="block text-sm font-medium text-textPrimary mb-2">Full Name</label>
+                            <input type="text" id="full_name_4" name="full_name" required class="w-full px-4 py-3 bg-surfaceLight border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-textPrimary placeholder-textTertiary transition-all" placeholder="Enter your full name">
+                        </div>
+
+                        <div>
+                            <label for="mobile_4" class="block text-sm font-medium text-textPrimary mb-2">Mobile Number</label>
+                            <input type="tel" id="mobile_4" name="mobile" required class="w-full px-4 py-3 bg-surfaceLight border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-textPrimary placeholder-textTertiary transition-all" placeholder="024 123 4567">
+                        </div>
+
+                        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md min-h-[52px]">
+                            <i class="fa-solid fa-lock"></i>
+                            Buy Plan With Paystack
+                        </button>
+                    </form>
+                </div>
+            </article>
+
+            <article id="plan-card-5" class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-borderLight">
+                <div class="p-6 lg:p-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl lg:text-2xl font-bold text-textPrimary mb-2">Weekend Warrior</h3>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-4xl lg:text-5xl font-bold text-primary">GHS 25</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <i class="fa-solid fa-calendar-days text-primary text-xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 pb-6 border-b border-borderLight">
+                        <p class="text-textSecondary text-sm lg:text-base leading-relaxed mb-4">Make the most of your weekends with high-speed internet. Perfect for catching up on shows, gaming, or video calling loved ones during your time off.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surfaceLight rounded-full text-xs font-medium text-textSecondary">
+                                <i class="fa-solid fa-database text-accent"></i>
+                                10GB Data
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surfaceLight rounded-full text-xs font-medium text-textSecondary">
+                                <i class="fa-solid fa-clock text-accent"></i>
+                                Fri-Sun Only
+                            </span>
+                        </div>
+                    </div>
+
+                    <form action="/portal/purchase-start" method="POST" class="space-y-4">
+                        <input type="hidden" name="plan_id" value="weekend-warrior">
+                        <input type="hidden" name="csrf_token" value="{% csrf_token %}">
+                        
+                        <div>
+                            <label for="full_name_5" class="block text-sm font-medium text-textPrimary mb-2">Full Name</label>
+                            <input type="text" id="full_name_5" name="full_name" required class="w-full px-4 py-3 bg-surfaceLight border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-textPrimary placeholder-textTertiary transition-all" placeholder="Enter your full name">
+                        </div>
+
+                        <div>
+                            <label for="mobile_5" class="block text-sm font-medium text-textPrimary mb-2">Mobile Number</label>
+                            <input type="tel" id="mobile_5" name="mobile" required class="w-full px-4 py-3 bg-surfaceLight border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-textPrimary placeholder-textTertiary transition-all" placeholder="024 123 4567">
+                        </div>
+
+                        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md min-h-[52px]">
+                            <i class="fa-solid fa-lock"></i>
+                            Buy Plan With Paystack
+                        </button>
+                    </form>
+                </div>
+            </article>
+
+            <article id="plan-card-6" class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-borderLight">
+                <div class="p-6 lg:p-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl lg:text-2xl font-bold text-textPrimary mb-2">Business Pro</h3>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-4xl lg:text-5xl font-bold text-primary">GHS 200</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
+                            <i class="fa-solid fa-briefcase text-accent text-xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 pb-6 border-b border-borderLight">
+                        <p class="text-textSecondary text-sm lg:text-base leading-relaxed mb-4">Enterprise-grade connectivity for small businesses and remote teams. Includes dedicated support, higher speeds, and priority bandwidth for critical business operations.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surfaceLight rounded-full text-xs font-medium text-textSecondary">
+                                <i class="fa-solid fa-database text-accent"></i>
+                                100GB Data
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surfaceLight rounded-full text-xs font-medium text-textSecondary">
+                                <i class="fa-solid fa-clock text-accent"></i>
+                                30 Days
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surfaceLight rounded-full text-xs font-medium text-textSecondary">
+                                <i class="fa-solid fa-headset text-accent"></i>
+                                24/7 Support
+                            </span>
+                        </div>
+                    </div>
+
+                    <form action="/portal/purchase-start" method="POST" class="space-y-4">
+                        <input type="hidden" name="plan_id" value="business-pro">
+                        <input type="hidden" name="csrf_token" value="{% csrf_token %}">
+                        
+                        <div>
+                            <label for="full_name_6" class="block text-sm font-medium text-textPrimary mb-2">Full Name</label>
+                            <input type="text" id="full_name_6" name="full_name" required class="w-full px-4 py-3 bg-surfaceLight border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-textPrimary placeholder-textTertiary transition-all" placeholder="Enter your full name">
+                        </div>
+
+                        <div>
+                            <label for="mobile_6" class="block text-sm font-medium text-textPrimary mb-2">Mobile Number</label>
+                            <input type="tel" id="mobile_6" name="mobile" required class="w-full px-4 py-3 bg-surfaceLight border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-textPrimary placeholder-textTertiary transition-all" placeholder="024 123 4567">
+                        </div>
+
+                        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:shadow-md min-h-[52px]">
+                            <i class="fa-solid fa-lock"></i>
+                            Buy Plan With Paystack
+                        </button>
+                    </form>
+                </div>
+            </article>
+
+        </section>
+
+        <section id="trust-section" class="bg-white rounded-2xl p-8 lg:p-12 shadow-sm border border-borderLight mb-12">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fa-solid fa-shield-halved text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl lg:text-3xl font-bold text-textPrimary mb-4">Secure Payment with Paystack</h3>
+                <p class="text-textSecondary text-base lg:text-lg leading-relaxed mb-8">Your payment information is protected with bank-level encryption. We partner with Paystack, Ghana's most trusted payment gateway, to ensure your transactions are safe and secure.</p>
+                <div class="flex flex-wrap items-center justify-center gap-6 lg:gap-8">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-check-circle text-success text-xl"></i>
+                        <span class="text-sm font-medium text-textSecondary">Instant Activation</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-check-circle text-success text-xl"></i>
+                        <span class="text-sm font-medium text-textSecondary">Mobile Money Accepted</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-check-circle text-success text-xl"></i>
+                        <span class="text-sm font-medium text-textSecondary">No Hidden Fees</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
+            <div id="feature-1" class="bg-white rounded-2xl p-6 lg:p-8 shadow-sm border border-borderLight">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                    <i class="fa-solid fa-bolt text-primary text-xl"></i>
+                </div>
+                <h4 class="text-lg lg:text-xl font-bold text-textPrimary mb-2">Lightning Fast</h4>
+                <p class="text-textSecondary text-sm lg:text-base leading-relaxed">Experience high-speed internet with minimal latency. Stream, game, and browse without interruption.</p>
+            </div>
+
+            <div id="feature-2" class="bg-white rounded-2xl p-6 lg:p-8 shadow-sm border border-borderLight">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                    <i class="fa-solid fa-network-wired text-primary text-xl"></i>
+                </div>
+                <h4 class="text-lg lg:text-xl font-bold text-textPrimary mb-2">Reliable Network</h4>
+                <p class="text-textSecondary text-sm lg:text-base leading-relaxed">Built on robust infrastructure with 99.5% uptime guarantee. Stay connected when it matters most.</p>
+            </div>
+
+            <div id="feature-3" class="bg-white rounded-2xl p-6 lg:p-8 shadow-sm border border-borderLight">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                    <i class="fa-solid fa-headset text-primary text-xl"></i>
+                </div>
+                <h4 class="text-lg lg:text-xl font-bold text-textPrimary mb-2">24/7 Support</h4>
+                <p class="text-textSecondary text-sm lg:text-base leading-relaxed">Our dedicated support team is always ready to help. Get assistance whenever you need it.</p>
+            </div>
+
+            <div id="feature-4" class="bg-white rounded-2xl p-6 lg:p-8 shadow-sm border border-borderLight">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                    <i class="fa-solid fa-mobile-screen-button text-primary text-xl"></i>
+                </div>
+                <h4 class="text-lg lg:text-xl font-bold text-textPrimary mb-2">Easy Management</h4>
+                <p class="text-textSecondary text-sm lg:text-base leading-relaxed">Monitor your data usage, renew plans, and manage your account from any device, anytime.</p>
+            </div>
+
+            <div id="feature-5" class="bg-white rounded-2xl p-6 lg:p-8 shadow-sm border border-borderLight">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                    <i class="fa-solid fa-users text-primary text-xl"></i>
+                </div>
+                <h4 class="text-lg lg:text-xl font-bold text-textPrimary mb-2">Community First</h4>
+                <p class="text-textSecondary text-sm lg:text-base leading-relaxed">Connecting Ghanaian communities with affordable, quality internet access for everyone.</p>
+            </div>
+
+            <div id="feature-6" class="bg-white rounded-2xl p-6 lg:p-8 shadow-sm border border-borderLight">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                    <i class="fa-solid fa-shield-halved text-primary text-xl"></i>
+                </div>
+                <h4 class="text-lg lg:text-xl font-bold text-textPrimary mb-2">Secure & Private</h4>
+                <p class="text-textSecondary text-sm lg:text-base leading-relaxed">Your data and privacy are protected with enterprise-grade security measures and encryption.</p>
+            </div>
+        </section>
+
+        <section id="faq-section" class="bg-white rounded-2xl p-8 lg:p-12 shadow-sm border border-borderLight mb-12">
+            <div class="max-w-3xl mx-auto">
+                <h3 class="text-2xl lg:text-3xl font-bold text-textPrimary mb-8 text-center">Frequently Asked Questions</h3>
+                <div class="space-y-4">
+                    <details class="group bg-surfaceLight rounded-xl p-6 cursor-pointer">
+                        <summary class="flex items-center justify-between font-semibold text-textPrimary list-none">
+                            <span>How do I activate my plan after purchase?</span>
+                            <i class="fa-solid fa-chevron-down text-textTertiary group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <p class="text-textSecondary text-sm lg:text-base mt-4 leading-relaxed">Your plan activates automatically within 2-5 minutes after successful payment. You'll receive a confirmation SMS with your login credentials and activation details.</p>
+                    </details>
+
+                    <details class="group bg-surfaceLight rounded-xl p-6 cursor-pointer">
+                        <summary class="flex items-center justify-between font-semibold text-textPrimary list-none">
+                            <span>Can I upgrade or downgrade my plan?</span>
+                            <i class="fa-solid fa-chevron-down text-textTertiary group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <p class="text-textSecondary text-sm lg:text-base mt-4 leading-relaxed">Yes! You can upgrade to a higher plan at any time. The unused balance from your current plan will be credited toward your new plan. Downgrades take effect at the end of your current billing cycle.</p>
+                    </details>
+
+                    <details class="group bg-surfaceLight rounded-xl p-6 cursor-pointer">
+                        <summary class="flex items-center justify-between font-semibold text-textPrimary list-none">
+                            <span>What payment methods are accepted?</span>
+                            <i class="fa-solid fa-chevron-down text-textTertiary group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <p class="text-textSecondary text-sm lg:text-base mt-4 leading-relaxed">We accept Mobile Money (MTN, Vodafone, AirtelTigo), all major debit and credit cards, and bank transfers through our secure Paystack payment gateway.</p>
+                    </details>
+
+                    <details class="group bg-surfaceLight rounded-xl p-6 cursor-pointer">
+                        <summary class="flex items-center justify-between font-semibold text-textPrimary list-none">
+                            <span>What happens if I run out of data before my plan expires?</span>
+                            <i class="fa-solid fa-chevron-down text-textTertiary group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <p class="text-textSecondary text-sm lg:text-base mt-4 leading-relaxed">You can purchase additional data bundles or upgrade to a larger plan. Your remaining validity period will be maintained, and the new data will be added to your account immediately.</p>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer id="footer" class="bg-white border-t border-border mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-spider text-white text-lg"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-primary">Ananse WiFi</h3>
+                    </div>
+                    <p class="text-textSecondary text-sm leading-relaxed mb-4">Connecting Ghanaian communities with fast, reliable, and affordable internet access.</p>
+                    <div class="flex items-center gap-3">
+                        <a href="#" class="w-10 h-10 rounded-full bg-surfaceLight flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-surfaceLight flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                            <i class="fa-brands fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-surfaceLight flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-textPrimary mb-4">Quick Links</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-textSecondary hover:text-primary transition-colors text-sm">Home</a></li>
+                        <li><a href="#" class="text-textSecondary hover:text-primary transition-colors text-sm">Plans</a></li>
+                        <li><a href="#" class="text-textSecondary hover:text-primary transition-colors text-sm">Coverage Map</a></li>
+                        <li><a href="#" class="text-textSecondary hover:text-primary transition-colors text-sm">About Us</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-textPrimary mb-4">Support</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-textSecondary hover:text-primary transition-colors text-sm">Help Center</a></li>
+                        <li><a href="#" class="text-textSecondary hover:text-primary transition-colors text-sm">Contact Us</a></li>
+                        <li><a href="#" class="text-textSecondary hover:text-primary transition-colors text-sm">FAQs</a></li>
+                        <li><a href="#" class="text-textSecondary hover:text-primary transition-colors text-sm">Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-textPrimary mb-4">Contact</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-2 text-textSecondary text-sm">
+                            <i class="fa-solid fa-phone text-accent mt-1"></i>
+                            <span>+233 24 123 4567</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-textSecondary text-sm">
+                            <i class="fa-solid fa-envelope text-accent mt-1"></i>
+                            <span>support@anansewifi.com</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-textSecondary text-sm">
+                            <i class="fa-solid fa-location-dot text-accent mt-1"></i>
+                            <span>Accra, Ghana</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-borderLight pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                <p class="text-textTertiary text-sm text-center md:text-left">© 2024 Ananse WiFi. All rights reserved.</p>
+                <div class="flex items-center gap-6">
+                    <a href="#" class="text-textTertiary hover:text-primary transition-colors text-sm">Privacy Policy</a>
+                    <a href="#" class="text-textTertiary hover:text-primary transition-colors text-sm">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

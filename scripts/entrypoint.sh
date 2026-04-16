@@ -17,7 +17,11 @@ if [ "${RUN_COLLECTSTATIC:-1}" = "1" ]; then
 fi
 
 if [ "$1" = "" ]; then
-  exec gunicorn -c gunicorn.conf.py ananseWifi.wsgi:application
+  if [ "${DJANGO_DEBUG:-0}" = "1" ]; then
+    exec gunicorn --reload -c gunicorn.conf.py ananseWifi.wsgi:application
+  else
+    exec gunicorn -c gunicorn.conf.py ananseWifi.wsgi:application
+  fi
 fi
 
 exec "$@"

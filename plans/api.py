@@ -19,6 +19,7 @@ class PlanSerializer(serializers.ModelSerializer):
             "idle_timeout_seconds",
             "session_timeout_seconds",
             "is_active",
+            "is_featured",
         ]
 
 

@@ -23,6 +23,7 @@ class PlanFactory(factory.django.DjangoModelFactory):
     price = 10
     duration_minutes = 60
     data_bytes = 1024 * 1024 * 1024
+    is_featured = False
     speed_profile = factory.SubFactory(SpeedProfileFactory)
 
 

@@ -1,0 +1,42 @@
+<footer id="footer" class="bg-white border-t border-border mt-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-spider text-white text-lg" aria-hidden="true"></i>
+          </div>
+          <h3 class="text-xl font-bold text-primary">{{ site_title|default:"Ananse WiFi" }}</h3>
+        </div>
+        <p class="text-textSecondary text-sm leading-relaxed mb-4">Connecting communities with fast, reliable, and affordable internet access.</p>
+      </div>
+      <div>
+        <h4 class="font-bold text-textPrimary mb-4">Quick Links</h4>
+        <ul class="space-y-3">
+          <li><a href="{% url 'portal:plans' %}" class="text-textSecondary hover:text-primary transition-colors text-sm">Plans</a></li>
+          <li><a href="{% url 'portal:login' %}" class="text-textSecondary hover:text-primary transition-colors text-sm">Login</a></li>
+          <li><a href="#faq-section" class="text-textSecondary hover:text-primary transition-colors text-sm">FAQs</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold text-textPrimary mb-4">Support</h4>
+        <ul class="space-y-3">
+          <li><a href="#faq-section" class="text-textSecondary hover:text-primary transition-colors text-sm">Help</a></li>
+          <li><a href="{% url 'portal:login' %}" class="text-textSecondary hover:text-primary transition-colors text-sm">Redeem voucher</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold text-textPrimary mb-4">Contact</h4>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-2 text-textSecondary text-sm">
+            <i class="fa-solid fa-globe text-accent mt-1" aria-hidden="true"></i>
+            <span>See your operator for local support numbers.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-borderLight pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <p class="text-textTertiary text-sm text-center md:text-left">&copy; {% now "Y" %} {{ site_title|default:"Ananse WiFi" }}. All rights reserved.</p>
+    </div>
+  </div>
+</footer>

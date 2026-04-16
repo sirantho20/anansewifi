@@ -13,7 +13,7 @@ class SpeedProfileAdmin(EcosystemSummaryAdminMixin, admin.ModelAdmin):
 
 @admin.register(Plan)
 class PlanAdmin(EcosystemSummaryAdminMixin, admin.ModelAdmin):
-    list_display = ("name", "price", "billing_type", "quota_type", "is_active")
-    list_filter = ("billing_type", "quota_type", "is_active")
+    list_display = ("name", "price", "billing_type", "quota_type", "is_featured", "is_active")
+    list_filter = ("billing_type", "quota_type", "is_featured", "is_active")
     search_fields = ("name",)
     autocomplete_fields = ("speed_profile",)

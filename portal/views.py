@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect, render
@@ -16,7 +17,21 @@ from vouchers.services import redeem_voucher
 
 
 def plans_view(request):
-    return render(request, "portal/plans.html", {"plans": Plan.objects.filter(is_active=True)})
+    plans = (
+        Plan.objects.filter(is_active=True)
+        .select_related("speed_profile")
+        .order_by("-is_featured", "price", "name")
+    )
+    site_title = settings.DAISY_SETTINGS.get("SITE_TITLE", "Ananse WiFi")
+    return render(
+        request,
+        "portal/plans.html",
+        {
+            "plans": plans,
+            "payment_currency": settings.PAYMENT_CURRENCY,
+            "site_title": site_title,
+        },
+    )
 
 
 def login_view(request):

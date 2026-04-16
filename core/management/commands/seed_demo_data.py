@@ -1,8 +1,10 @@
+from decimal import Decimal
+
 from django.core.management.base import BaseCommand
 
 from customers.models import Customer
 from network.models import NASDevice, Site
-from plans.models import Plan, SpeedProfile
+from plans.models import BillingType, Plan, QuotaType, SpeedProfile
 from vouchers.models import Voucher, VoucherBatch
 
 
@@ -32,6 +34,72 @@ class Command(BaseCommand):
                 data_bytes=1024 * 1024 * 1024,
                 speed_profile=speed_profile,
             )
+
+        extra_plans = [
+            {
+                "name": "Daily Pass",
+                "description": (
+                    "Full-day Wi‑Fi for visitors and remote workers who need a single, "
+                    "simple window from first login through midnight. No hourly top-ups—"
+                    "just connect, work, stream, and sign off when the day ends."
+                ),
+                "price": Decimal("25.00"),
+                "quota_type": QuotaType.DURATION,
+                "duration_minutes": 24 * 60,
+                "data_bytes": None,
+            },
+            {
+                "name": "Weekend Special",
+                "description": (
+                    "Friday evening through Sunday night coverage for pop-up shops, "
+                    "house guests, and small events. Designed so your hotspot can stay "
+                    "busy all weekend without you babysitting voucher codes."
+                ),
+                "price": Decimal("35.00"),
+                "quota_type": QuotaType.DURATION,
+                "duration_minutes": 48 * 60,
+                "data_bytes": None,
+            },
+            {
+                "name": "Quick Drop-In (45 min)",
+                "description": (
+                    "Short, affordable session for people who only need to grab email, "
+                    "send a file, or message home before they head out. Perfect near "
+                    "transport hubs, cafés, and reception desks."
+                ),
+                "price": Decimal("2.50"),
+                "quota_type": QuotaType.DURATION,
+                "duration_minutes": 45,
+                "data_bytes": None,
+            },
+            {
+                "name": "Heavy Data Boost (5 GB)",
+                "description": (
+                    "Data-first pack for uploads, cloud sync, and HD calls when clock "
+                    "time matters less than megabytes. Stops automatically when the "
+                    "allowance is used—great for creators on a tight budget."
+                ),
+                "price": Decimal("18.00"),
+                "quota_type": QuotaType.DATA,
+                "duration_minutes": None,
+                "data_bytes": 5 * 1024 * 1024 * 1024,
+            },
+        ]
+        for row in extra_plans:
+            Plan.objects.get_or_create(
+                name=row["name"],
+                defaults={
+                    "description": row["description"],
+                    "price": row["price"],
+                    "billing_type": BillingType.VOUCHER,
+                    "quota_type": row["quota_type"],
+                    "duration_minutes": row["duration_minutes"],
+                    "data_bytes": row["data_bytes"],
+                    "speed_profile": speed_profile,
+                    "is_active": True,
+                },
+            )
+
         customer, _ = Customer.objects.get_or_create(
             username="demo-customer",
             defaults={
@@ -70,5 +138,11 @@ class Command(BaseCommand):
                     "status": "available",
                 },
             )
+
+        Plan.objects.update(is_featured=False)
+        featured = Plan.objects.filter(name="Daily Pass", is_active=True).first()
+        if featured:
+            featured.is_featured = True
+            featured.save(update_fields=["is_featured", "updated_at"])
 
         self.stdout.write(self.style.SUCCESS(f"Demo data ready for {customer.username}"))
