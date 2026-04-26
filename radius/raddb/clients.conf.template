@@ -1,0 +1,11 @@
+client localhost {
+    ipaddr = 127.0.0.1
+    secret = __RADIUS_CLIENT_SECRET__
+    shortname = localhost
+}
+
+client chr_hotspot {
+    ipaddr = 172.20.20.1
+    secret = __RADIUS_CLIENT_SECRET__
+    shortname = chr-hotspot
+}

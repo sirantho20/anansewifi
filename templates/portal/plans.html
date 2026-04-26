@@ -1,0 +1,37 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title %}{{ site_title }} — Plans{% endblock %}
+
+{% block content %}
+{% include "portal/includes/plans_header.html" %}
+
+<main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+
+  <section id="page-header" class="mb-8 lg:mb-12">
+    <div class="max-w-3xl">
+      <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-textPrimary mb-3 lg:mb-4">Choose Your Internet Plan</h2>
+      <p class="text-base lg:text-lg text-textSecondary leading-relaxed">Select the perfect prepaid Wi-Fi plan for your needs. Fast, reliable, and affordable internet for your community.</p>
+    </div>
+  </section>
+
+  {% include "portal/includes/plans_messages.html" %}
+
+  <section id="plans-grid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8 mb-12">
+    {% for plan in plans %}
+      {% include "portal/includes/plan_card.html" %}
+    {% empty %}
+      <div class="col-span-full bg-white rounded-2xl border border-borderLight p-8 text-center text-textSecondary">
+        <p class="text-lg font-medium text-textPrimary mb-2">No plans available yet</p>
+        <p class="text-sm">Please check back later or contact your administrator.</p>
+      </div>
+    {% endfor %}
+  </section>
+
+  {% include "portal/includes/plans_trust.html" %}
+  {% include "portal/includes/plans_features.html" %}
+  {% include "portal/includes/plans_faq.html" %}
+
+</main>
+
+{% include "portal/includes/plans_footer.html" %}
+{% endblock %}

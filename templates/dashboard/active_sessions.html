@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Active Sessions</h1>
+{% for row in sessions %}
+  <div class="card">
+    <p><strong>{{ row.customer.full_name|default:row.username }}</strong> - {{ row.session_id }}</p>
+    <p>Identity: {{ row.customer.phone|default:row.username }}</p>
+    <p>MAC: {{ row.mac_address }} | Started: {{ row.started_at }}</p>
+    <p>Usage: {{ row.total_octets }} bytes</p>
+  </div>
+{% empty %}
+  <div class="card">No active sessions.</div>
+{% endfor %}
+{% endblock %}

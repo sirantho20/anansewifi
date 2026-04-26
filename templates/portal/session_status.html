@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Session Status</h1>
+<div class="card">
+  <p>User: {{ customer.full_name|default:username }}</p>
+  <p>Mobile: {{ customer.phone|default:"Not set" }}</p>
+  {% if entitlement %}
+    <p>Plan: {{ entitlement.plan.name }}</p>
+    <p>Status: {{ entitlement.get_status_display }}</p>
+    <p>Ends: {{ entitlement.end_at|default:"Unlimited or usage-based" }}</p>
+    <p>Remaining Data: {{ entitlement.remaining_data_bytes|default:"Unlimited" }}</p>
+  {% else %}
+    <p>No active entitlement. Redeem another voucher.</p>
+  {% endif %}
+</div>
+{% endblock %}

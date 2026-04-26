@@ -1,5 +1,14 @@
+# Local / env
 .env
-__pycache__/
-*.pyc
 .venv/
 venv/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Django
+staticfiles/
+db.sqlite3

@@ -1,0 +1,25 @@
+<header id="header" class="bg-white border-b border-border sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 lg:h-20">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+          <i class="fa-solid fa-spider text-white text-lg lg:text-xl" aria-hidden="true"></i>
+        </div>
+        <div>
+          <h1 class="text-xl lg:text-2xl font-bold text-primary">{{ site_title|default:"Ananse WiFi" }}</h1>
+          <p class="text-xs text-textSecondary hidden sm:block">Community Internet Plans</p>
+        </div>
+      </div>
+      <nav class="hidden md:flex items-center gap-6" aria-label="Main">
+        <a href="{% url 'portal:plans' %}" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Plans</a>
+        <a href="{% url 'portal:login' %}" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Login</a>
+        <a href="#faq-section" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Help</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="{% url 'portal:login' %}" class="w-10 h-10 rounded-full bg-surfaceLight flex items-center justify-center hover:bg-border transition-colors" aria-label="Portal login">
+          <i class="fa-regular fa-user text-textSecondary" aria-hidden="true"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>

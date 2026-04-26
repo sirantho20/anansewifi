@@ -1,2 +1,20 @@
+# Ananse WiFi billing platform (Django, Celery, RADIUS integration)
+Django==4.2.11
+django-daisy==2.0.8
+requests==2.32.3
+djangorestframework==3.15.2
+django-filter==24.3
+psycopg[binary]==3.2.3
+celery==5.4.0
+redis==5.2.0
+gunicorn==23.0.0
+pytest==8.3.3
+pytest-django==4.9.0
+factory-boy==3.3.1
+ruff==0.6.9
+black==24.10.0
+isort==5.13.2
+
+# MikroTik / lab router tools (mikrotik_helper.py, local scripts; optional venv for router-only)
 paramiko>=3.4.0
 python-dotenv>=1.0.0

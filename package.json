@@ -1,0 +1,10 @@
+{
+  "name": "anansewifi-portal-css",
+  "private": true,
+  "scripts": {
+    "build:portal-css": "tailwindcss -i ./static/src/portal-plans-input.css -o ./static/css/portal-plans.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Operator Dashboard</h1>
+<div class="row">
+  <div class="card">
+    <h3>Active Sessions</h3>
+    <p>{{ active_sessions }}</p>
+  </div>
+  <div class="card">
+    <h3>Active Customers</h3>
+    <p>{{ active_customers }}</p>
+  </div>
+  <div class="card">
+    <h3>Revenue (Success Payments)</h3>
+    <p>GHS {{ revenue_total }}</p>
+  </div>
+</div>
+<div class="card">
+  <p><a href="/dashboard/sessions/">View active sessions</a></p>
+  <p><a href="/dashboard/auth-issues/">View auth issues</a></p>
+</div>
+{% endblock %}

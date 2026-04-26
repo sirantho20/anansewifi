@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ananse WiFi</title>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <style>
+    body { font-family: sans-serif; margin: 0; background: #f4f6f8; color: #1f2937; }
+    .container { max-width: 960px; margin: 0 auto; padding: 1rem; }
+    .card { background: #fff; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .row { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .row > .card { flex: 1; min-width: 220px; }
+    input, button { width: 100%; padding: .7rem; margin-top: .4rem; }
+    button { cursor: pointer; background: #2563eb; color: #fff; border: none; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="card">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>
