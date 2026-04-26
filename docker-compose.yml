@@ -8,8 +8,6 @@ services:
     labels:
       ananse.log.namespace: base.django
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
     volumes:
@@ -34,8 +32,6 @@ services:
       ananse.log.namespace: base.django.celery.worker
     command: celery -A ananseWifi worker --loglevel=INFO
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
 
@@ -54,26 +50,6 @@ services:
       redis:
         condition: service_healthy
 
-  db:
-    image: postgres:16
-    command:
-      - postgres
-      - -c
-      - log_line_prefix=%m [%p] base.postgres |
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    labels:
-      ananse.log.namespace: base.postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   redis:
     image: redis:7
     labels:
@@ -91,11 +67,11 @@ services:
     env_file:
       - .env
     environment:
-      RADIUS_DB_HOST: ${RADIUS_DB_HOST:-db}
+      RADIUS_DB_HOST: ${RADIUS_DB_HOST}
       RADIUS_DB_PORT: ${RADIUS_DB_PORT:-5432}
-      RADIUS_DB_NAME: ${RADIUS_DB_NAME:-ananse_wifi}
-      RADIUS_DB_USER: ${RADIUS_DB_USER:-ananse}
-      RADIUS_DB_PASSWORD: ${RADIUS_DB_PASSWORD:-ananse}
+      RADIUS_DB_NAME: ${RADIUS_DB_NAME}
+      RADIUS_DB_USER: ${RADIUS_DB_USER}
+      RADIUS_DB_PASSWORD: ${RADIUS_DB_PASSWORD}
       RADIUS_SQL_DIALECT: ${RADIUS_SQL_DIALECT:-postgresql}
       RADIUS_CLIENT_SECRET: ${RADIUS_CLIENT_SECRET:-ananse-radius-secret}
       LOG_NAMESPACE: base.radius
@@ -111,8 +87,6 @@ services:
       timeout: 5s
       retries: 5
     depends_on:
-      db:
-        condition: service_healthy
       web:
         condition: service_started
 
@@ -132,5 +106,4 @@ services:
       - ./staticfiles:/app/staticfiles:ro
 
 volumes:
-  postgres_data:
   redis_data:
