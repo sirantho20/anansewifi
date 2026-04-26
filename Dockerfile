@@ -14,6 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 
-RUN chmod +x /app/scripts/entrypoint.sh
+COPY scripts/entrypoint.sh /usr/local/bin/ananse-web-entrypoint.sh
+RUN chmod +x /usr/local/bin/ananse-web-entrypoint.sh
 
-ENTRYPOINT ["sh", "/app/scripts/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/ananse-web-entrypoint.sh"]

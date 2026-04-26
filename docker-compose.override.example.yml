@@ -1,0 +1,7 @@
+# Copy to docker-compose.override.yml (gitignored) to bind-mount the repo into `web` for local live reload.
+# Docker Compose merges this with docker-compose.yml automatically when the file is present.
+#   cp docker-compose.override.example.yml docker-compose.override.yml
+services:
+  web:
+    volumes:
+      - .:/app

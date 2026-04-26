@@ -1,5 +1,6 @@
 # Local / env
 .env
+docker-compose.override.yml
 .venv/
 venv/
 node_modules/

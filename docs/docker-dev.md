@@ -23,6 +23,15 @@
 4. `make seed`
 5. Browse `http://localhost:18080` (or set `NGINX_HTTP_PORT=8080` in `.env` if port 8080 is available on your host)
 
+## Live reload (optional)
+
+The default `docker-compose.yml` does not bind-mount the project into the `web` container (so production and Coolify use the app copied into the image). To pick up local code changes without rebuilding `web` each time, copy the example override and bring the stack up again:
+
+1. `cp docker-compose.override.example.yml docker-compose.override.yml`
+2. `make up`
+
+Compose automatically merges `docker-compose.override.yml` with `docker-compose.yml`. Remove `docker-compose.override.yml` when you need to test the same layout as a remote deploy.
+
 ## Common operations
 
 - create migrations: `make makemigrations`
