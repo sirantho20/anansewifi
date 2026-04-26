@@ -1,0 +1,171 @@
+MikroTik hEX S Network Configuration Narrative
+
+1. Overview
+
+The MikroTik router has been configured as a dual-WAN router with controlled failover and segmented LAN access. The goal of the setup is not just redundancy, but prioritized access depending on which ISP is active.
+
+2. WAN Configuration
+
+Two internet sources are connected:
+
+* ether1 → ISP1 (Primary)
+* ether2 → ISP2 (Backup)
+
+Both interfaces obtain IP addresses via DHCP.
+
+Routing Behavior:
+
+* ISP1 has a default route with distance 1 (preferred)
+* ISP2 has a default route with distance 2 (backup)
+
+This means all traffic uses ISP1 unless it becomes unavailable, at which point ISP2 is used.
+
+NAT Configuration:
+
+* Masquerade rules are applied on both ether1 and ether2
+* This allows internal LAN devices to access the internet through either ISP
+
+3. LAN Architecture
+
+The LAN is split into two segments:
+
+Main LAN:
+
+* Ports: ether4 and ether5
+* Interface: bridge-main
+* Network: 192.168.10.0/24
+* Gateway: 192.168.10.1
+
+Backup LAN:
+
+* Port: ether3
+* Network: 192.168.20.0/24
+* Gateway: 192.168.20.1
+
+Each network has its own DHCP server:
+
+* dhcp-main for bridge-main
+* dhcp-backup for ether3
+* For 192.168.20.0/24, ip dhcp-server network must use gateway and DNS 192.168.20.1 (if set to 192.168.10.1, clients on ether3 have no L2 path to the gateway and get no internet).
+
+4. Bridge Configuration
+
+* ether4 and ether5 are combined into bridge-main
+* Hardware offload is enabled (fast switching at hardware level)
+* ether3 remains separate and is not part of the bridge
+
+5. Firewall Logic (Core Behavior)
+
+Custom firewall rules are placed at the top of the forward chain.
+
+Main LAN Rules (192.168.10.0/24):
+
+* Allowed to access internet via ISP1 (ether1)
+* Blocked from using ISP2 (ether2)
+
+Backup LAN Rules (192.168.20.0/24):
+
+* Allowed to use ISP1
+* Allowed to use ISP2
+
+Resulting Behavior:
+
+When ISP1 is UP:
+
+* Main LAN (ether4/5) → Internet access
+* Backup LAN (ether3) → Internet access
+
+When ISP1 is DOWN:
+
+* Backup LAN (ether3) → Internet via ISP2
+* Main LAN (ether4/5) → No internet
+
+This creates a controlled failover environment where only critical devices retain connectivity during outages.
+
+6. Performance Characteristics
+
+Router Performance:
+
+* CPU usage is very low (~2%)
+* No queue limits are configured
+* Hardware offloading is active
+
+Bottlenecks Identified:
+
+1. TP-Link EAP110-Outdoor Access Point
+
+   * Only supports 100 Mbps Ethernet
+   * Limits throughput on main LAN
+
+2. USB-C Ethernet Adapter
+
+   * Also limited to 100 Mbps
+   * Affects testing accuracy
+
+Observed Speeds:
+
+* Expected real throughput: ~40–90 Mbps due to 100 Mbps link
+
+7. Previous Issue (Resolved)
+
+Initially, both WAN interfaces were connected to the same gateway/subnet. This caused:
+
+* Routing ambiguity
+* ARP conflicts
+* Severe bandwidth degradation (~4 Mbps)
+
+This has now been resolved by using two separate ISPs.
+
+8. Current Network Behavior Summary
+
+The system now operates as:
+
+* Dual-WAN failover router
+* Segmented LAN with priority-based access
+* Hardware-accelerated switching for LAN
+* NAT-enabled internet access
+
+9. Limitations
+
+* Main LAN speed limited by 100 Mbps hardware
+* Failover is basic (based on route availability)
+* No advanced ISP health monitoring implemented yet
+
+10. Recommended Improvements
+
+* Upgrade access point to Gigabit-capable device
+* Replace 100 Mbps Ethernet adapter
+* Implement advanced failover detection (Netwatch or recursive routing)
+* Add remote ISP monitoring (VPS integration)
+
+11. Conclusion
+
+The network is correctly configured and functioning as intended. The current limitations are due to hardware constraints and not configuration errors. The design successfully achieves controlled failover and network segmentation.
+
+12. Lab note (Hotspot / development)
+
+MikroTik Hotspot is active on 192.168.10.0/24 (gateway 192.168.10.1). Use that network—same SSID/LAN as bridge-main clients—to test captive portal, login pages, and session behavior. Clients on that segment are not expected to reach the public internet through the router for general browsing. **Cursor model/API calls** (and other tools that need the public internet) must use this machine’s **Wi‑Fi** (or another interface with a working default route), not routing that is confined to the Hotspot lab on 192.168.10.x only.
+
+For **SSH to the router** via [mikrotik_helper.py](mikrotik_helper.py), `.env` uses **`ROUTER_IP`** when set; **`ROUTER_IP_2`** is optional fallback if `ROUTER_IP` is empty (e.g. alternate management address).
+
+To confirm the **rendered** Hotspot login HTML over the **Hotspot Wi‑Fi** path (not only files on the router), run [verify_hotspot_page.py](verify_hotspot_page.py) (it uses `curl --interface` to your Wi‑Fi interface, default **en0** on macOS, and checks the **Ananse** title and login form in the response).
+
+13. Captive portal login sheet not appearing (investigation)
+
+Router checks (when reachable via SSH; re-run with `python mikrotik_helper.py hotspot-diagnose`, or `python mikrotik_helper.py --host <addr> hotspot-diagnose` if `.env` `ROUTER_IP` is unreachable from your PC): Hotspot server `hotspot-main` on `bridge-main` is running; profile `cp-main` uses `dns-name=login.hotspot` and `flash/hotspot`; DHCP for `192.168.10.0/24` sets DNS to `192.168.10.1`; dynamic `login.hotspot` → `192.168.10.1` exists; `/ip hotspot host` shows clients with DHCP (`H`) and without authorized (`A`) until login; `/ip hotspot active` is empty until someone logs in; cookies table was empty in checks. If **device-mode** still has **proxy: no** (see section 14), walled-garden host rules can show as **inactivated** and break Apple/Android captive probes. With **proxy: yes** and reboot applied, those rules should be active. AP path for Hotspot must be `bridge-main` (ether4/ether5), not a segment without Hotspot.
+
+Traffic that is **not** classified as a Hotspot client (e.g. admin PC on another subnet) hitting `192.168.10.1:80` may see **RouterOS WebFig** on `/` and **404** on `/login`—that is expected; only Hotspot-marked HTTP goes to the servlet.
+
+**Phone checks (manual):** Turn **cellular data off** (or use Airplane Mode + Wi‑Fi only); forget the SSID; rejoin. In **Safari**, open **`http://login.hotspot`** or **`http://neverssl.com`** (plain HTTP). Turn off VPN, iCloud Private Relay, and try toggling **Limit IP Address Tracking** for that network.
+
+**Interpretation:** If Safari on the Hotspot Wi‑Fi shows the login page but the automatic captive sheet never appears, the Hotspot path is working and the issue is usually **iOS captive detection** (cellular, DNS, or probe behavior), not missing Hotspot HTML. If there is **no** row for the phone’s MAC under `/ip hotspot host`, the phone is not on the Hotspot bridge or not using that DHCP/DNS path.
+
+**Automation note:** A re-run from the dev environment may get **SSH timeout** to both `ROUTER_IP` and `ROUTER_IP_2` if that machine has no route to the router; run `hotspot-diagnose` on a laptop that is on the lab LAN or VPN that can reach the device.
+
+14. Home device-mode and walled-garden (ether4/5 / iPhone captive)
+
+On **mode=home**, **/ip proxy** is off by default. Walled-garden rules for Hotspot then show **inactivated, not allowed by device-mode** (the same applies to `/ip proxy print`: inactivated). iOS captive detection (HTTPS to Apple) needs those rules to be **active**. Fix: **/system device-mode update proxy=yes**, then **confirm** with a **cold reboot** or **Reset/Mode** when the router prompts (see MikroTik Device-mode docs). The repo file [enable_proxy_device_mode.rsc](enable_proxy_device_mode.rsc) contains the one-liner for import. After reboot, re-check: **/ip hotspot walled-garden print** should no longer show the inactivation comment on each entry, and **/ip proxy** should not be inactivated. **Hotspot** can stay `hotspot=yes` in device-mode; this only adds **proxy** as an allowed feature for the home profile. Do **not** add Android connectivity-check hosts (e.g. `connectivitycheck.gstatic.com`) to the walled-garden: they can let the real **HTTP 204/200** “I have internet” response through, so the phone **stops** showing a captive state. Apple-style **dst-host** lines are a separate tradeoff; keep the minimal set. **Bridge + Hotspot:** for Hotspot on a **bridge** (e.g. `bridge-main`), set **`/interface bridge settings set use-ip-firewall=yes`** so forwarded traffic is processed by the IP/Hotspot path and **HTTP/HTTPS** requests get the login redirect. **SSL:** a certificate on the Hotspot **profile** whose CN/SAN match **`login.hotspot`**, with **`/certificate set … trusted=yes`**, enables RFC 7710–style **DHCP captive portal** metadata when supported; a **self‑signed** chain still makes browsers show a **certificate warning** on HTTPS until you use a publicly trusted cert or import the CA.
+
+15. Lab Hotspot without a public FQDN (no browser-trusted cert)
+
+For a **lab** setup with **no** public DNS, keep **`/ip hotspot profile` cp-main** on **HTTP-first** flow: **`ssl-certificate=none`**, **`login-by=cookie,http-chap,http-pap`** (no **`https`** in `login-by` until you add a real cert). This avoids **invalid certificate** on the default **`http://login.hotspot/`** and **`http://192.168.10.1/login`** experience. The **`https-redirect`** property may be unavailable in some builds; if present and set to **no**, unauthenticated **HTTPS** to random sites is often **dropped** rather than redirected, so an automatic **“open browser to login”** is **unreliable** for **HTTPS-only** pages (**HSTS**, etc.); use **`http://neverssl.com`**, **`http://login.hotspot`**, or let the OS’s **HTTP** captive probe run (disable **DoH/Private DNS/VPN** on the client so it uses **192.168.10.1** for DNS). **iOS/Android** may still **not** show a system captive sheet without a **trusted** cert and full RFC 7710; open **Safari/Chrome** to **`http://…`** manually. Run [verify_hotspot_page.py](verify_hotspot_page.py) over the Hotspot interface (default **en0**); add **`--insecure`** only if you turn **TLS** back on the profile with a self-signed cert.

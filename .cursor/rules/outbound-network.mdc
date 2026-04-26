@@ -1,0 +1,10 @@
+---
+description: Use Wi-Fi for Cursor model calls and public internet, not the Hotspot lab LAN
+alwaysApply: true
+---
+
+# Outbound network (Cursor and tooling)
+
+- **Cursor model / API traffic** and any **LLM or cloud tool calls** from the IDE must use the host machine’s **Wi‑Fi** (or another interface that has a working default route to the public internet).
+- Do **not** rely on **192.168.10.0/24** (Hotspot lab on `bridge-main`) as the path for those calls: that segment is for **Hotspot and captive-portal testing** and may not provide general internet.
+- **SSH to the router** (`ROUTER_IP`, often `192.168.10.1`) is fine from any reachable path; that is unrelated to where Cursor sends model requests.

@@ -1,0 +1,133 @@
+<html>
+<head>
+$(if refresh-timeout)
+<meta http-equiv="refresh" content="$(refresh-timeout-secs)">
+$(endif)
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="expires" content="-1">
+    <title>Ananse WiFi — Session status</title>
+    <style>
+      html { min-height: 100%; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #0c1424;
+        color: #e8ecf4;
+        font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+        -webkit-text-size-adjust: 100%;
+      }
+      .shell {
+        box-sizing: border-box;
+        min-height: 100vh;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        padding: max(1.25rem, env(safe-area-inset-top, 0px)) max(1.25rem, env(safe-area-inset-right, 0px)) max(1.25rem, env(safe-area-inset-bottom, 0px)) max(1.25rem, env(safe-area-inset-left, 0px));
+      }
+      .card {
+        width: 100%;
+        max-width: 420px;
+        padding: 2rem 1.5rem;
+        border-radius: 14px;
+        background: #1a2438;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+      }
+      .brand { margin-bottom: 1.1rem; text-align: center; }
+      .brand strong { display: block; font-size: 1.35rem; font-weight: 700; color: #fff; }
+      .brand span { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(232, 236, 244, 0.55); }
+      h1 { font-size: 1.2rem; font-weight: 600; text-align: center; margin-bottom: 0.25rem; color: #fff; }
+      .sub { text-align: center; font-size: 0.88rem; color: rgba(232, 236, 244, 0.68); margin-bottom: 1rem; }
+      .foot { text-align: center; margin-top: 1.25rem; font-size: 0.72rem; color: rgba(232, 236, 244, 0.38); }
+      .status-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+      .status-table td { padding: 0.65rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: rgba(232, 236, 244, 0.88); }
+      .status-table td:first-child { font-weight: 600; color: rgba(232, 236, 244, 0.55); width: 42%; }
+      .status-actions { margin-top: 1rem; }
+      input[type="submit"] {
+        width: 100%;
+        height: 48px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #0c1220;
+        background: linear-gradient(180deg, #f0c56c, #e8a435);
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      a { color: #f0c56c; }
+    </style>
+    <link rel="stylesheet" href="hotspot.css">
+    <script>
+$(if advert-pending == 'yes')
+        var popup = '';
+        function focusAdvert() {
+            if (window.focus) popup.focus();
+        }
+        function openAdvert() {
+            popup = open('$(link-advert)', 'hotspot_advert', '');
+            setTimeout("focusAdvert()", 1000);
+        }
+$(endif)
+        function openLogout() {
+            if (window.name != 'hotspot_status') return true;
+            open('$(link-logout)', 'hotspot_logout', 'toolbar=0,location=0,directories=0,status=0,menubars=0,resizable=1,width=280,height=250');
+            window.close();
+            return false;
+        }
+    </script>
+</head>
+<body$(if advert-pending == 'yes') onLoad="openAdvert()"$(endif)>
+    <div class="shell">
+        <div class="card">
+            <div class="brand">
+                <strong>Ananse WiFi</strong>
+                <span>Your session</span>
+            </div>
+
+$(if login-by == 'trial')
+            <h1>Hi, trial guest</h1>
+            <p class="sub">You are online with trial access.</p>
+$(elif login-by != 'mac')
+            <h1>Hi, $(username)</h1>
+            <p class="sub">You are connected.</p>
+$(else)
+            <h1>Connected</h1>
+            <p class="sub">Session active.</p>
+$(endif)
+
+            <form action="$(link-logout)" name="logout" onSubmit="return openLogout()">
+                <table class="status-table">
+                    <tr><td>IP address</td><td>$(ip)</td></tr>
+                    <tr><td>Bytes up / down</td><td>$(bytes-in-nice) / $(bytes-out-nice)</td></tr>
+$(if session-time-left)
+                    <tr><td>Connected / time left</td><td>$(uptime) / $(session-time-left)</td></tr>
+$(else)
+                    <tr><td>Connected</td><td>$(uptime)</td></tr>
+$(endif)
+$(if blocked == 'yes')
+                    <tr><td>Status</td><td class="advert"><a href="$(link-advert)" target="hotspot_advert">Advertisement required</a></td></tr>
+$(elif refresh-timeout)
+                    <tr><td>Status refresh</td><td>$(refresh-timeout)</td></tr>
+$(endif)
+                </table>
+$(if login-by-mac != 'yes')
+                <div class="status-actions">
+                    <input type="submit" value="Log out">
+                </div>
+$(endif)
+            </form>
+
+            <p class="foot">Close this window if it opened in a popup after login.</p>
+        </div>
+    </div>
+</body>
+</html>

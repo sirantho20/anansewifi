@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+"""
+Fetch the MikroTik Hotspot login page over a specific interface (Wi‑Fi to 192.168.10.x)
+and verify the rendered HTML matches the expected Ananse portal (see hotspot/login.html).
+
+Uses curl(1) so traffic is bound to the interface (macOS: --interface en0).
+
+Example:
+  HOTSPOT_WIFI_IF=en0 python3 verify_hotspot_page.py
+  python3 verify_hotspot_page.py --url http://login.hotspot/login
+  python3 verify_hotspot_page.py --insecure  # if profile uses HTTPS/self-signed again
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+
+def _run_curl(
+    url: str, interface: str, max_time: float, *, insecure: bool
+) -> tuple[int, str, str, str]:
+    """
+    Return (returncode, body, writeout, stderr).
+    On success, writeout is two lines: http_code and final_url (from curl -w).
+    """
+    fd, path = tempfile.mkstemp(suffix=".html")
+    os.close(fd)
+    try:
+        # Lab default: profile is HTTP-first (no ssl-certificate on Hotspot profile).
+        # Use --insecure if you re-enable HTTPS on the profile with a self-signed cert.
+        cmd = [
+            "curl",
+            "-sS",
+            "-L",
+            "--connect-timeout",
+            "8",
+            "--max-time",
+            str(max_time),
+            "--interface",
+            interface,
+            "-o",
+            path,
+            "-w",
+            "%{http_code}\n%{url_effective}",
+        ]
+        if insecure:
+            cmd.insert(3, "-k")
+        cmd.append(url)
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=int(max_time) + 15
+        )
+        err = (proc.stderr or "").strip()
+        if proc.returncode != 0:
+            return proc.returncode, "", "", err or f"exit {proc.returncode}"
+        body = Path(path).read_text(encoding="utf-8", errors="replace")
+        wo = (proc.stdout or "").strip()
+        return 0, body, wo, err
+    finally:
+        try:
+            Path(path).unlink()
+        except OSError:
+            pass
+
+
+def verify_body(body: str) -> list[str]:
+    """Return list of human-readable failures; empty if OK."""
+    failures: list[str] = []
+    if not body.strip():
+        failures.append("empty response body")
+        return failures
+    if "<!DOCTYPE html>" not in body and "<!doctype html>" not in body.lower():
+        failures.append("missing HTML5 doctype")
+    if not re.search(r"<title>\s*Ananse WiFi\s*—\s*Sign in\s*</title>", body, re.I):
+        if "Ananse WiFi" not in body or "Sign in" not in body:
+            failures.append("expected <title>Ananse WiFi — Sign in</title> (or title text)")
+    if "<form" not in body.lower():
+        failures.append("missing <form> (login form)")
+    if not re.search(r'name\s*=\s*["\']password["\']', body, re.I):
+        failures.append("missing name=password input (Hotspot login)")
+    if "name=username" not in body.replace("'", '"') and 'name="username"' not in body:
+        # template may use single quotes
+        if not re.search(r'name\s*=\s*["\']username["\']', body, re.I):
+            failures.append("missing username field")
+    return failures
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(description="Verify Hotspot login HTML over Wi‑Fi interface.")
+    p.add_argument(
+        "--interface",
+        "-i",
+        default=os.environ.get("HOTSPOT_WIFI_IF", "en0"),
+        help="Interface bound to Hotspot LAN (default: en0 or HOTSPOT_WIFI_IF).",
+    )
+    p.add_argument(
+        "--url",
+        default="http://login.hotspot/",
+        help="Initial URL (redirects to /login).",
+    )
+    p.add_argument(
+        "--max-time",
+        type=float,
+        default=15.0,
+        help="curl --max-time (seconds).",
+    )
+    p.add_argument(
+        "--insecure",
+        "-k",
+        action="store_true",
+        help="Pass curl -k (accept self-signed HTTPS) if Hotspot uses TLS again.",
+    )
+    args = p.parse_args()
+
+    insecure = args.insecure or os.environ.get("HOTSPOT_CURL_INSECURE", "").lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+    code, body, writeout, cerr = _run_curl(
+        args.url, args.interface, args.max_time, insecure=insecure
+    )
+    if code != 0:
+        print(f"curl failed (exit {code}): {cerr}", file=sys.stderr)
+        return 1
+
+    lines = writeout.split("\n", 1)
+    http_code = int(lines[0].strip()) if lines and lines[0].strip().isdigit() else 0
+    final_url = lines[1].strip() if len(lines) > 1 else ""
+    if cerr:
+        print(f"curl_note: {cerr}", file=sys.stderr)
+
+    print(f"http_code={http_code}")
+    print(f"final_url={final_url}")
+    print(f"body_bytes={len(body.encode('utf-8'))}")
+
+    if http_code != 200:
+        print(f"FAIL: expected HTTP 200, got {http_code}", file=sys.stderr)
+        return 1
+    if "/login" not in final_url.lower() and "hotspot" not in final_url.lower():
+        print(
+            f"WARN: final URL may not be Hotspot login path: {final_url}",
+            file=sys.stderr,
+        )
+
+    failures = verify_body(body)
+    if failures:
+        for f in failures:
+            print(f"FAIL: {f}", file=sys.stderr)
+        preview = body[:1200].replace("\n", " ")[:800]
+        print(f"body_preview: {preview!r}...", file=sys.stderr)
+        return 1
+
+    print("OK: Hotspot login page HTML looks like the Ananse portal (title, form, fields).")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
