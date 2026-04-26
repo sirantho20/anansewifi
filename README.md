@@ -24,11 +24,11 @@ FreeRADIUS writes `radacct`, and Django consumes those records so billing workfl
    - `make up`
 3. Seed demo data:
    - `make seed`
-4. Open:
-   - Portal login: `http://localhost:8080/portal/login/`
-   - Plans: `http://localhost:8080/portal/plans/`
-   - Dashboard: `http://localhost:8080/dashboard/`
-   - Admin: `http://localhost:8080/admin/`
+4. Open (nginx publishes host port **18080** by default; set `NGINX_HTTP_PORT=8080` in `.env` if you prefer 8080 and it is free):
+   - Portal login: `http://localhost:18080/portal/login/`
+   - Plans: `http://localhost:18080/portal/plans/`
+   - Dashboard: `http://localhost:18080/dashboard/`
+   - Admin: `http://localhost:18080/admin/`
 
 ## Demo workflow
 

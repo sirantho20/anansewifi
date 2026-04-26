@@ -1,16 +1,50 @@
-{% extends "base.html" %}
+{% extends "portal/base_portal.html" %}
+
+{% block title %}{{ site_title }} — Session status{% endblock %}
+
 {% block content %}
-<h1>Session Status</h1>
-<div class="card">
-  <p>User: {{ customer.full_name|default:username }}</p>
-  <p>Mobile: {{ customer.phone|default:"Not set" }}</p>
-  {% if entitlement %}
-    <p>Plan: {{ entitlement.plan.name }}</p>
-    <p>Status: {{ entitlement.get_status_display }}</p>
-    <p>Ends: {{ entitlement.end_at|default:"Unlimited or usage-based" }}</p>
-    <p>Remaining Data: {{ entitlement.remaining_data_bytes|default:"Unlimited" }}</p>
-  {% else %}
-    <p>No active entitlement. Redeem another voucher.</p>
-  {% endif %}
-</div>
+{% include "portal/includes/plans_header.html" %}
+
+<main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+  {% include "portal/includes/plans_messages.html" %}
+
+  <div class="max-w-2xl mx-auto">
+    <h2 class="text-2xl lg:text-3xl font-bold text-textPrimary mb-6" id="session-status-heading">Session Status</h2>
+
+    <div class="bg-white rounded-2xl border border-borderLight shadow-sm p-6 lg:p-8">
+      <dl class="space-y-4">
+        <div>
+          <dt class="text-xs font-medium text-textTertiary uppercase tracking-wide">User</dt>
+          <dd class="text-textPrimary text-lg font-medium mt-0.5">{{ customer.full_name|default:username }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-textTertiary uppercase tracking-wide">Mobile</dt>
+          <dd class="text-textPrimary mt-0.5">{{ customer.phone|default:"Not set" }}</dd>
+        </div>
+        {% if entitlement %}
+        <div>
+          <dt class="text-xs font-medium text-textTertiary uppercase tracking-wide">Plan</dt>
+          <dd class="text-textPrimary mt-0.5">{{ entitlement.plan.name }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-textTertiary uppercase tracking-wide">Status</dt>
+          <dd class="text-textPrimary mt-0.5">{{ entitlement.get_status_display }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-textTertiary uppercase tracking-wide">Ends</dt>
+          <dd class="text-textPrimary mt-0.5">{{ entitlement.end_at|default:"Unlimited or usage-based" }}</dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium text-textTertiary uppercase tracking-wide">Remaining data</dt>
+          <dd class="text-textPrimary mt-0.5">{{ entitlement.remaining_data_bytes|default:"Unlimited" }}</dd>
+        </div>
+        {% else %}
+        <p class="text-textSecondary">No active entitlement. Redeem another voucher or <a href="{% url 'portal:plans' %}" class="text-primary font-medium hover:underline">browse plans</a>.</p>
+        {% endif %}
+      </dl>
+    </div>
+  </div>
+</main>
+
+{% include "portal/includes/plans_footer.html" %}
 {% endblock %}

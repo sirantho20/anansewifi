@@ -1,16 +1,70 @@
-{% extends "base.html" %}
+{% extends "portal/base_portal.html" %}
+
+{% block title %}{{ site_title }} — Wi‑Fi login{% endblock %}
+
 {% block content %}
-<h1>Captive Portal Login</h1>
-<div class="card">
-  <form method="post">
-    {% csrf_token %}
-    <label>Mobile or Username</label>
-    <input type="text" name="identity" value="{{ identity|default:'' }}" placeholder="+233XXXXXXXXX or username" required>
-    <label>Voucher Code</label>
-    <input type="text" name="voucher_code" placeholder="voucher code" required>
-    <label>MAC Address</label>
-    <input type="text" name="mac_address" placeholder="AA:BB:CC:DD:EE:FF">
-    <button type="submit">Redeem and Connect</button>
-  </form>
-</div>
+{% include "portal/includes/plans_header.html" %}
+
+<main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12" data-testid="portal-wifi-login">
+  {% include "portal/includes/plans_messages.html" %}
+
+  <div class="max-w-xl mx-auto">
+    <div class="text-center mb-8">
+      <h2 class="text-2xl lg:text-3xl font-bold text-textPrimary mb-2">Connect to Wi‑Fi</h2>
+      <p class="text-textSecondary text-sm lg:text-base leading-relaxed">Enter the mobile or username on your account and your voucher code to get online. If you do not have a voucher yet, browse our plans to purchase one.</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-borderLight shadow-sm p-6 lg:p-8">
+      <form method="post" class="space-y-5" novalidate>
+        {% csrf_token %}
+        <div>
+          <label for="id-identity" class="block text-sm font-medium text-textPrimary mb-1.5">Mobile or username</label>
+          <input
+            id="id-identity"
+            type="text"
+            name="identity"
+            value="{{ identity|default:'' }}"
+            required
+            autocomplete="username"
+            class="w-full rounded-lg border border-border bg-white px-4 py-3 text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="+233XXXXXXXXX or username"
+          >
+        </div>
+        <div>
+          <label for="id-voucher" class="block text-sm font-medium text-textPrimary mb-1.5">Voucher code</label>
+          <input
+            id="id-voucher"
+            type="text"
+            name="voucher_code"
+            required
+            autocomplete="one-time-code"
+            class="w-full rounded-lg border border-border bg-white px-4 py-3 text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="Enter your voucher"
+          >
+        </div>
+        <div>
+          <label for="id-mac" class="block text-sm font-medium text-textPrimary mb-1.5">Device MAC address <span class="text-textTertiary font-normal">(optional)</span></label>
+          <input
+            id="id-mac"
+            type="text"
+            name="mac_address"
+            class="w-full rounded-lg border border-border bg-white px-4 py-3 text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="AA:BB:CC:DD:EE:FF"
+            inputmode="text"
+            autocapitalize="characters"
+          >
+        </div>
+        <button type="submit" class="w-full min-h-[52px] rounded-xl bg-primary text-white font-semibold text-base hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors">
+          Redeem and connect
+        </button>
+      </form>
+    </div>
+
+    <p class="text-center mt-8">
+      <a href="{% url 'portal:plans' %}" class="inline-flex items-center justify-center text-primary font-semibold hover:underline">Browse internet plans</a>
+    </p>
+  </div>
+</main>
+
+{% include "portal/includes/plans_footer.html" %}
 {% endblock %}

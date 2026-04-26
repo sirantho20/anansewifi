@@ -3,7 +3,7 @@
 ## Services
 
 - `web`: Django + Gunicorn
-- `db`: PostgreSQL
+- external PostgreSQL via `DATABASE_URL` (no `db` service in the default compose file)
 - `redis`: Redis broker/backend
 - `worker`: Celery worker
 - `beat`: Celery beat scheduler
@@ -21,7 +21,7 @@
 2. `make migrate`
 3. `make up`
 4. `make seed`
-5. Browse `http://localhost:8080`
+5. Browse `http://localhost:18080` (or set `NGINX_HTTP_PORT=8080` in `.env` if port 8080 is available on your host)
 
 ## Common operations
 

@@ -16,13 +16,17 @@ from sessions.models import Entitlement
 from vouchers.services import redeem_voucher
 
 
+def _portal_site_title() -> str:
+    return settings.DAISY_SETTINGS.get("SITE_TITLE", "Ananse WiFi")
+
+
 def plans_view(request):
     plans = (
         Plan.objects.filter(is_active=True)
         .select_related("speed_profile")
         .order_by("-is_featured", "price", "name")
     )
-    site_title = settings.DAISY_SETTINGS.get("SITE_TITLE", "Ananse WiFi")
+    site_title = _portal_site_title()
     return render(
         request,
         "portal/plans.html",
@@ -62,7 +66,11 @@ def login_view(request):
                 details={"error": str(exc), "mac_address": mac_address},
             )
             messages.error(request, f"Login failed: {exc}")
-    return render(request, "portal/login.html", {"identity": request.GET.get("identity", "")})
+    return render(
+        request,
+        "portal/login.html",
+        {"identity": request.GET.get("identity", ""), "site_title": _portal_site_title()},
+    )
 
 
 def session_status_view(request, username: str):
@@ -75,7 +83,12 @@ def session_status_view(request, username: str):
     return render(
         request,
         "portal/session_status.html",
-        {"username": username, "entitlement": active_entitlement, "customer": customer},
+        {
+            "username": username,
+            "entitlement": active_entitlement,
+            "customer": customer,
+            "site_title": _portal_site_title(),
+        },
     )
 
 
@@ -159,5 +172,6 @@ def purchase_callback_view(request):
             "sms_sent": result.sms_sent,
             "sms_error": result.sms_error,
             "login_identity": result.customer.phone or result.customer.username,
+            "site_title": _portal_site_title(),
         },
     )

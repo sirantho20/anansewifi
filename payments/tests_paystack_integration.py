@@ -17,7 +17,7 @@ def _skip_if_live_paystack_not_configured() -> None:
 
 
 def _callback_url() -> str:
-    return settings.PAYSTACK_CALLBACK_URL or "http://localhost:8080/portal/purchase/callback/"
+    return settings.PAYSTACK_CALLBACK_URL or "http://localhost:18080/portal/purchase/callback/"
 
 
 def test_live_paystack_initialize_returns_checkout_data():

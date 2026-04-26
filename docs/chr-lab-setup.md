@@ -18,7 +18,7 @@
 ## Service expectations
 
 - RADIUS auth/accounting: UDP 1812/1813
-- Django/nginx operator access: TCP 8080
+- Django/nginx operator access: TCP host port from `NGINX_HTTP_PORT` (default **18080** in `docker-compose`; use 8080 only if you set `NGINX_HTTP_PORT=8080` and nothing else binds it)
 - PostgreSQL and Redis remain internal to Docker network
 
 ## FreeRADIUS client example

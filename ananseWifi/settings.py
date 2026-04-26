@@ -14,6 +14,7 @@ ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split("
 
 _csrf_trusted = os.getenv(
     "DJANGO_CSRF_TRUSTED_ORIGINS",
+    "http://127.0.0.1:18080,http://localhost:18080,"
     "http://127.0.0.1:8080,http://localhost:8080",
 )
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_trusted.split(",") if o.strip()]
@@ -193,7 +194,9 @@ LOGGING = {
 PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY", "")
 PAYSTACK_PUBLIC_KEY = os.getenv("PAYSTACK_PUBLIC_KEY", "")
 PAYSTACK_BASE_URL = os.getenv("PAYSTACK_BASE_URL", "https://api.paystack.co")
-PAYSTACK_CALLBACK_URL = os.getenv("PAYSTACK_CALLBACK_URL", "http://localhost:8080/portal/purchase/callback/")
+PAYSTACK_CALLBACK_URL = os.getenv(
+    "PAYSTACK_CALLBACK_URL", "http://localhost:18080/portal/purchase/callback/"
+)
 PAYMENT_CURRENCY = os.getenv("PAYMENT_CURRENCY", "GHS")
 
 HUBTEL_CLIENT_ID = os.getenv("HUBTEL_CLIENT_ID", "")
