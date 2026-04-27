@@ -13,7 +13,7 @@ def test_portal_login_get_shows_wi_fi_page_and_plans_link(client):
     response = client.get("/portal/login/")
     assert response.status_code == 200
     assert b'data-testid="portal-wifi-login"' in response.content
-    assert b"/portal/plans/" in response.content
+    assert b"/portal/packages/" in response.content
     assert b"Ananse WiFi" in response.content
     assert b"Connect to" in response.content and b"Wi" in response.content
 

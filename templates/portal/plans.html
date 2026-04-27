@@ -1,6 +1,6 @@
 {% extends "portal/base_portal.html" %}
 
-{% block title %}{{ site_title }} — Plans{% endblock %}
+{% block title %}{{ site_title }} — Packages{% endblock %}
 
 {% block content %}
 {% include "portal/includes/plans_header.html" %}
@@ -9,8 +9,8 @@
 
   <section id="page-header" class="mb-8 lg:mb-12">
     <div class="max-w-3xl">
-      <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-textPrimary mb-3 lg:mb-4">Choose Your Internet Plan</h2>
-      <p class="text-base lg:text-lg text-textSecondary leading-relaxed">Select the perfect prepaid Wi-Fi plan for your needs. Fast, reliable, and affordable internet for your community.</p>
+      <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-textPrimary mb-3 lg:mb-4">Choose your Wi‑Fi package</h2>
+      <p class="text-base lg:text-lg text-textSecondary leading-relaxed">Pick a prepaid package that fits you. Pay online, receive your voucher, then sign in on the Wi‑Fi login page to get online.</p>
     </div>
   </section>
 
@@ -21,7 +21,7 @@
       {% include "portal/includes/plan_card.html" %}
     {% empty %}
       <div class="col-span-full bg-white rounded-2xl border border-borderLight p-8 text-center text-textSecondary">
-        <p class="text-lg font-medium text-textPrimary mb-2">No plans available yet</p>
+        <p class="text-lg font-medium text-textPrimary mb-2">No packages available yet</p>
         <p class="text-sm">Please check back later or contact your administrator.</p>
       </div>
     {% endfor %}

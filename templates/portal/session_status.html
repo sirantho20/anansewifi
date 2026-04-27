@@ -39,7 +39,7 @@
           <dd class="text-textPrimary mt-0.5">{{ entitlement.remaining_data_bytes|default:"Unlimited" }}</dd>
         </div>
         {% else %}
-        <p class="text-textSecondary">No active entitlement. Redeem another voucher or <a href="{% url 'portal:plans' %}" class="text-primary font-medium hover:underline">browse plans</a>.</p>
+        <p class="text-textSecondary">No active entitlement. Redeem another voucher or <a href="{% url 'portal:packages' %}" class="text-primary font-medium hover:underline">browse packages</a>.</p>
         {% endif %}
       </dl>
     </div>

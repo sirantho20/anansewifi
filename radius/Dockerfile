@@ -1,5 +1,9 @@
 FROM freeradius/freeradius-server:latest
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY raddb/clients.conf.template /opt/ananse-radius/clients.conf.template
 COPY raddb/mods-enabled/sql.template /opt/ananse-radius/sql.template
 COPY raddb/sites-enabled/default /opt/ananse-radius/default.site

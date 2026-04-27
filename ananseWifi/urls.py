@@ -18,8 +18,11 @@ from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import include, path
 
+from portal.views import login_view
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("", login_view, name="home"),
     path("portal/", include("portal.urls")),
     path("dashboard/", include("dashboard.urls")),
     path("api/", include("core.api_urls")),

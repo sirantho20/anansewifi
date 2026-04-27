@@ -11,7 +11,7 @@
   <div class="max-w-xl mx-auto">
     <div class="text-center mb-8">
       <h2 class="text-2xl lg:text-3xl font-bold text-textPrimary mb-2">Connect to Wi‑Fi</h2>
-      <p class="text-textSecondary text-sm lg:text-base leading-relaxed">Enter the mobile or username on your account and your voucher code to get online. If you do not have a voucher yet, browse our plans to purchase one.</p>
+      <p class="text-textSecondary text-sm lg:text-base leading-relaxed">Enter the mobile or username on your account and your voucher code to get online. Need a voucher? Buy a package first, then redeem your code below.</p>
     </div>
 
     <div class="bg-white rounded-2xl border border-borderLight shadow-sm p-6 lg:p-8">
@@ -60,9 +60,13 @@
       </form>
     </div>
 
-    <p class="text-center mt-8">
-      <a href="{% url 'portal:plans' %}" class="inline-flex items-center justify-center text-primary font-semibold hover:underline">Browse internet plans</a>
-    </p>
+    <div class="mt-6 space-y-3">
+      <a href="{% url 'portal:packages' %}" class="w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-xl border-2 border-primary bg-white text-primary font-semibold text-base hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors">
+        <i class="fa-solid fa-box-open" aria-hidden="true"></i>
+        View packages and buy
+      </a>
+      <p class="text-center text-textTertiary text-xs leading-relaxed">Pay securely, get your voucher by SMS, then return here to connect.</p>
+    </div>
   </div>
 </main>
 

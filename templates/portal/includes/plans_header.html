@@ -1,25 +1,30 @@
 <header id="header" class="bg-white border-b border-border sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16 lg:h-20">
-      <div class="flex items-center gap-3">
+      <a href="{% url 'home' %}" class="flex items-center gap-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
         <div class="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
           <i class="fa-solid fa-spider text-white text-lg lg:text-xl" aria-hidden="true"></i>
         </div>
         <div>
           <h1 class="text-xl lg:text-2xl font-bold text-primary">{{ site_title|default:"Ananse WiFi" }}</h1>
-          <p class="text-xs text-textSecondary hidden sm:block">Community Internet Plans</p>
+          <p class="text-xs text-textSecondary hidden sm:block">Community Wi‑Fi packages</p>
         </div>
-      </div>
+      </a>
       <nav class="hidden md:flex items-center gap-6" aria-label="Main">
-        <a href="{% url 'portal:plans' %}" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Plans</a>
-        <a href="{% url 'portal:login' %}" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Login</a>
-        <a href="{% url 'portal:plans' %}#faq-section" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Help</a>
+        <a href="{% url 'portal:packages' %}" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Packages</a>
+        <a href="{% url 'home' %}" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Wi‑Fi login</a>
+        <a href="{% url 'portal:packages' %}#faq-section" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Help</a>
       </nav>
       <div class="flex items-center gap-3">
-        <a href="{% url 'portal:login' %}" class="w-10 h-10 rounded-full bg-surfaceLight flex items-center justify-center hover:bg-border transition-colors" aria-label="Portal login">
+        <a href="{% url 'home' %}" class="w-10 h-10 rounded-full bg-surfaceLight flex items-center justify-center hover:bg-border transition-colors" aria-label="Wi‑Fi login">
           <i class="fa-regular fa-user text-textSecondary" aria-hidden="true"></i>
         </a>
       </div>
     </div>
+    <nav class="md:hidden flex items-center justify-around gap-2 border-t border-borderLight py-3" aria-label="Mobile">
+      <a href="{% url 'portal:packages' %}" class="text-sm font-semibold text-primary">Packages</a>
+      <a href="{% url 'home' %}" class="text-sm font-medium text-textSecondary">Login</a>
+      <a href="{% url 'portal:packages' %}#faq-section" class="text-sm font-medium text-textSecondary">Help</a>
+    </nav>
   </div>
 </header>

@@ -10,6 +10,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    volumes:
+      - staticfiles_data:/app/staticfiles
     expose:
       - "8000"
     healthcheck:
@@ -103,7 +105,8 @@ services:
     ports:
       - "${NGINX_HTTP_PORT:-18080}:80"
     volumes:
-      - ./staticfiles:/app/staticfiles:ro
+      - staticfiles_data:/app/staticfiles:ro
 
 volumes:
   redis_data:
+  staticfiles_data:

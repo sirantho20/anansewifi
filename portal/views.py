@@ -94,7 +94,7 @@ def session_status_view(request, username: str):
 
 def purchase_start_view(request):
     if request.method != "POST":
-        return redirect("portal:plans")
+        return redirect("portal:packages")
 
     plan_id = request.POST.get("plan_id", "")
     full_name = request.POST.get("full_name", "").strip()
@@ -128,14 +128,14 @@ def purchase_start_view(request):
             target_id=plan_id or "unknown",
             details={"error": str(exc), "full_name": full_name},
         )
-        return redirect("portal:plans")
+        return redirect("portal:packages")
 
 
 def purchase_callback_view(request):
     reference = (request.GET.get("reference") or request.GET.get("trxref") or "").strip()
     if not reference:
         messages.error(request, "Missing payment reference.")
-        return redirect("portal:plans")
+        return redirect("portal:packages")
 
     try:
         result = verify_plan_purchase(reference)
@@ -148,7 +148,7 @@ def purchase_callback_view(request):
             target_id=reference,
             details={"error": str(exc)},
         )
-        return redirect("portal:plans")
+        return redirect("portal:packages")
 
     AuditLog.objects.create(
         actor=result.customer.phone or result.customer.username,

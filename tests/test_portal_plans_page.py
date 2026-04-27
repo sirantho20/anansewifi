@@ -17,7 +17,7 @@ def test_portal_plans_page_lists_active_plan(client):
     assert response.status_code == 200
     assert b"Portal Listed Plan" in response.content
     assert b"GHS" in response.content or b"12.50" in response.content
-    assert b"Choose Your Internet Plan" in response.content
+    assert "Choose your Wi‑Fi package" in response.content.decode()
 
 
 @pytest.mark.django_db
