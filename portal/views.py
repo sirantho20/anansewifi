@@ -130,6 +130,9 @@ def purchase_start_view(request):
     plan_id = request.POST.get("plan_id", "")
     full_name = request.POST.get("full_name", "").strip()
     mobile = request.POST.get("mobile", "").strip()
+    if not full_name or not mobile:
+        messages.error(request, "Please enter your full name and mobile number.")
+        return redirect("portal:packages")
     plan = get_object_or_404(Plan, id=plan_id, is_active=True)
     try:
         callback_url = request.build_absolute_uri(reverse("portal:purchase-callback"))

@@ -177,9 +177,6 @@ class Plan(BaseModel):
                 raw.append({"icon": "clock", "label": dlabel})
 
         raw.append({"icon": "tag", "label": self.get_billing_type_display()})
-        speed = self.speed_badge_label()
-        if speed:
-            raw.append({"icon": "gauge-high", "label": speed})
         if self.concurrent_device_limit > 1:
             n = self.concurrent_device_limit
             raw.append({"icon": "mobile-screen", "label": f"Up to {n} devices"})

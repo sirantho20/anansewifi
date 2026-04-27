@@ -10,7 +10,7 @@
   <section id="page-header" class="mb-8 lg:mb-12">
     <div class="max-w-3xl">
       <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold text-textPrimary mb-3 lg:mb-4">Choose your Wi‑Fi package</h2>
-      <p class="text-base lg:text-lg text-textSecondary leading-relaxed">Pick a prepaid package that fits you. Pay online, receive your voucher, then sign in on the Wi‑Fi login page to get online.</p>
+      <p class="text-base lg:text-lg text-textSecondary leading-relaxed">Prepaid packages: pay online, get your voucher, then sign in on the Wi‑Fi login page.</p>
     </div>
   </section>
 
@@ -27,11 +27,63 @@
     {% endfor %}
   </section>
 
+  <noscript>
+    <style>
+    #plans-grid .plan-purchase-step1 { display: none !important; }
+    #plans-grid [data-purchase-panel] { display: block !important; }
+    #plans-grid [data-purchase-cancel] { display: none !important; }
+    </style>
+  </noscript>
+
   {% include "portal/includes/plans_trust.html" %}
-  {% include "portal/includes/plans_features.html" %}
   {% include "portal/includes/plans_faq.html" %}
 
 </main>
+
+<script>
+(function () {
+  var grid = document.getElementById("plans-grid");
+  if (!grid) return;
+  function setExpanded(reveal, on) { reveal.setAttribute("aria-expanded", on ? "true" : "false"); }
+  grid.addEventListener("click", function (e) {
+    var r = e.target && e.target.closest && e.target.closest("[data-purchase-reveal]");
+    if (r) {
+      e.preventDefault();
+      var form = r.closest("form");
+      if (!form) return;
+      var step1 = form.querySelector(".plan-purchase-step1");
+      var panel = form.querySelector("[data-purchase-panel]");
+      var nameIn = form.querySelector("[data-purchase-name]");
+      var mobileIn = form.querySelector("[data-purchase-mobile]");
+      if (!step1 || !panel) return;
+      step1.classList.add("hidden");
+      panel.classList.remove("hidden");
+      setExpanded(r, true);
+      if (nameIn) nameIn.setAttribute("required", "required");
+      if (mobileIn) mobileIn.setAttribute("required", "required");
+      if (nameIn) nameIn.focus();
+      return;
+    }
+    var c = e.target && e.target.closest && e.target.closest("[data-purchase-cancel]");
+    if (c) {
+      e.preventDefault();
+      var form2 = c.closest("form");
+      if (!form2) return;
+      var step1b = form2.querySelector(".plan-purchase-step1");
+      var panel2 = form2.querySelector("[data-purchase-panel]");
+      var reveal2 = form2.querySelector("[data-purchase-reveal]");
+      var name2 = form2.querySelector("[data-purchase-name]");
+      var mobile2 = form2.querySelector("[data-purchase-mobile]");
+      if (!step1b || !panel2 || !reveal2) return;
+      panel2.classList.add("hidden");
+      step1b.classList.remove("hidden");
+      setExpanded(reveal2, false);
+      if (name2) { name2.removeAttribute("required"); name2.value = ""; }
+      if (mobile2) { mobile2.removeAttribute("required"); mobile2.value = ""; }
+    }
+  });
+})();
+</script>
 
 {% include "portal/includes/plans_footer.html" %}
 {% endblock %}
