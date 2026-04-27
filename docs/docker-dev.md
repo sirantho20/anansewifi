@@ -2,13 +2,13 @@
 
 ## Services
 
-- `web`: Django + Gunicorn
+- `web`: Django + Gunicorn (the only app service with `build: .`); `worker` and `beat` use the same `ananse-wifi:local` image
 - external PostgreSQL via `DATABASE_URL` (no `db` service in the default compose file)
 - `redis`: Redis broker/backend
 - `worker`: Celery worker
 - `beat`: Celery beat scheduler
 - `radius`: FreeRADIUS daemon
-- `nginx`: reverse proxy
+- `nginx`: reverse proxy (proxies `/static/` to the app so Gunicorn+WhiteNoise serve files baked in the `ananse-wifi:local` image; no static volume)
 
 `radius` is built from `radius/Dockerfile` and configured to:
 - read auth policy from `radcheck` and `radreply`
@@ -49,3 +49,10 @@ When code or Docker dependencies change:
 1. `make down`
 2. `make up`
 3. validate with portal/API/admin smoke checks
+
+## Redeploy timing (build vs. container start)
+
+If a redeploy feels slow even when the Git tree is unchanged, check **where the time goes**:
+
+- **Build / registry** — `pip install`, `apt-get`, or “pushing” layers. Often cache-related: use BuildKit, avoid `--no-cache` unless needed, and on hosts like **Coolify** turn on build cache so image layers from unchanged `Dockerfile` / `requirements.txt` reuse. A large Docker build context also slows the upload; this repo’s `.dockerignore` trims it.
+- **Web container start** — Postgres wait, `migrate` / `ensure_default_plans`, and (when enabled) `collectstatic` in `scripts/entrypoint.sh` before Gunicorn. The default image runs migrations at boot; `collectstatic` is off by default because static assets are built into the app image.

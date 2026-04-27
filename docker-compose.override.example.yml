@@ -5,3 +5,6 @@ services:
   web:
     volumes:
       - .:/app
+    # Bind mount hides the image’s collected static; run collectstatic on each `web` start when changing static/ or first boot.
+    environment:
+      RUN_COLLECTSTATIC: "1"

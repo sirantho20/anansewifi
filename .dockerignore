@@ -1,0 +1,47 @@
+# Git and VCS
+.git
+.github
+
+# Python
+**/__pycache__
+**/*.py[cod]
+**/*.so
+.venv
+venv
+env
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
+
+# Local env and secrets (runtime inject via compose / host)
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.cursor
+.DS_Store
+*.swp
+*~
+
+# Project artifacts not needed in the image
+*.md
+docs
+.plans
+docker-compose.yml
+docker-compose*.yml
+docker-compose.override.yml
+nginx
+radius
+
+# Tests and tooling
+.gitignore
+.editorconfig
+Makefile
+mypy.ini
+tox.ini
+
+# Large local assets not part of the app runtime (adjust if you add them to the image on purpose)
+*.log

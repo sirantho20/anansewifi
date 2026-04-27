@@ -32,13 +32,14 @@ if h:
   fi
 fi
 
+# Default 0: static is baked in the image. Set to 1 when using a bind mount or after changing static assets.
 if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
   python manage.py migrate --noinput
   # Idempotent: ensures default unlimited plans exist in DATABASE_URL / Postgres (and any DB)
   python manage.py ensure_default_plans
 fi
 
-if [ "${RUN_COLLECTSTATIC:-1}" = "1" ]; then
+if [ "${RUN_COLLECTSTATIC:-0}" = "1" ]; then
   python manage.py collectstatic --noinput
 fi
 
