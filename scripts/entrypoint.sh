@@ -34,6 +34,8 @@ fi
 
 if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
   python manage.py migrate --noinput
+  # Idempotent: ensures default unlimited plans exist in DATABASE_URL / Postgres (and any DB)
+  python manage.py ensure_default_plans
 fi
 
 if [ "${RUN_COLLECTSTATIC:-1}" = "1" ]; then

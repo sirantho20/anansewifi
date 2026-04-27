@@ -12,6 +12,7 @@ from payments.services import (
     initialize_plan_purchase,
     verify_plan_purchase,
 )
+from radius_integration.services import verify_radius_cleartext_password
 from sessions.models import Entitlement
 from vouchers.services import redeem_voucher
 
@@ -40,32 +41,62 @@ def plans_view(request):
 
 def login_view(request):
     if request.method == "POST":
+        auth_mode = request.POST.get("auth_mode", "voucher")
         identity = request.POST.get("identity", "").strip()
-        voucher_code = request.POST.get("voucher_code", "")
-        mac_address = request.POST.get("mac_address", "")
-        try:
-            customer = find_customer_by_identity(identity)
-            if not customer:
-                raise ValueError("Customer not found for the provided username/mobile.")
-            redeem_voucher(voucher_code, customer, mac_address=mac_address)
-            AuditLog.objects.create(
-                actor=customer.phone or customer.username,
-                action="voucher_redeemed",
-                target_type="Voucher",
-                target_id=voucher_code,
-                details={"mac_address": mac_address},
-            )
-            messages.success(request, "Voucher redeemed successfully.")
-            return redirect("portal:session-status", username=customer.username)
-        except Exception as exc:  # noqa: BLE001
-            AuditLog.objects.create(
-                actor=identity or "anonymous",
-                action="portal_login_failed",
-                target_type="Voucher",
-                target_id=voucher_code or "unknown",
-                details={"error": str(exc), "mac_address": mac_address},
-            )
-            messages.error(request, f"Login failed: {exc}")
+        if auth_mode == "password":
+            wifi_password = request.POST.get("wifi_password", "")
+            try:
+                customer = find_customer_by_identity(identity)
+                if not customer:
+                    raise ValueError("Customer not found for the provided username/mobile.")
+                if not verify_radius_cleartext_password(
+                    customer=customer,
+                    cleartext_password=wifi_password,
+                ):
+                    raise ValueError("Invalid username/mobile or password.")
+                AuditLog.objects.create(
+                    actor=customer.phone or customer.username,
+                    action="portal_password_login",
+                    target_type="Customer",
+                    target_id=customer.username,
+                    details={},
+                )
+                messages.success(request, "Signed in successfully.")
+                return redirect("portal:session-status", username=customer.username)
+            except Exception as exc:  # noqa: BLE001
+                AuditLog.objects.create(
+                    actor=identity or "anonymous",
+                    action="portal_login_failed",
+                    target_type="Customer",
+                    target_id=identity or "unknown",
+                    details={"error": str(exc), "auth_mode": "password"},
+                )
+                messages.error(request, f"Login failed: {exc}")
+        else:
+            voucher_code = request.POST.get("voucher_code", "")
+            try:
+                customer = find_customer_by_identity(identity)
+                if not customer:
+                    raise ValueError("Customer not found for the provided username/mobile.")
+                redeem_voucher(voucher_code, customer, mac_address="")
+                AuditLog.objects.create(
+                    actor=customer.phone or customer.username,
+                    action="voucher_redeemed",
+                    target_type="Voucher",
+                    target_id=voucher_code,
+                    details={},
+                )
+                messages.success(request, "Voucher redeemed successfully.")
+                return redirect("portal:session-status", username=customer.username)
+            except Exception as exc:  # noqa: BLE001
+                AuditLog.objects.create(
+                    actor=identity or "anonymous",
+                    action="portal_login_failed",
+                    target_type="Voucher",
+                    target_id=voucher_code or "unknown",
+                    details={"error": str(exc), "auth_mode": "voucher"},
+                )
+                messages.error(request, f"Login failed: {exc}")
     return render(
         request,
         "portal/login.html",

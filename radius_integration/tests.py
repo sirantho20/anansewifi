@@ -6,7 +6,11 @@ from plans.models import Plan, SpeedProfile
 from sessions.models import Entitlement, Session
 
 from .models import RadAcct, RadCheck, RadReply
-from .services import sync_entitlement_to_radius, sync_radacct_records
+from .services import (
+    sync_entitlement_to_radius,
+    sync_radacct_records,
+    verify_radius_cleartext_password,
+)
 
 
 class RadiusProjectionTests(TestCase):
@@ -47,6 +51,42 @@ class RadiusProjectionTests(TestCase):
                 attribute="Mikrotik-Rate-Limit",
                 value="1M/2M",
             ).exists()
+        )
+
+
+class VerifyRadiusCleartextPasswordTests(TestCase):
+    def test_accepts_matching_password(self):
+        speed_profile = SpeedProfile.objects.create(
+            name="VerifySpeed",
+            up_rate_kbps=1024,
+            down_rate_kbps=2048,
+            mikrotik_rate_limit="1M/2M",
+        )
+        plan = Plan.objects.create(
+            name="Verify Plan",
+            price=5,
+            duration_minutes=60,
+            speed_profile=speed_profile,
+            idle_timeout_seconds=300,
+            session_timeout_seconds=1800,
+        )
+        customer = Customer.objects.create(username="verify-user", full_name="Verify User")
+        entitlement = Entitlement.objects.create(customer=customer, plan=plan, status="active")
+        sync_entitlement_to_radius(
+            username=customer.username,
+            cleartext_password="secret-code",
+            entitlement=entitlement,
+        )
+        self.assertTrue(
+            verify_radius_cleartext_password(customer=customer, cleartext_password="secret-code"),
+        )
+        self.assertFalse(
+            verify_radius_cleartext_password(customer=customer, cleartext_password="wrong"),
+        )
+        self.assertFalse(verify_radius_cleartext_password(customer=customer, cleartext_password=""))
+        no_row = Customer.objects.create(username="no-radcheck", full_name="No Row")
+        self.assertFalse(
+            verify_radius_cleartext_password(customer=no_row, cleartext_password="anything"),
         )
 
 

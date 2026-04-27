@@ -1,9 +1,15 @@
+import secrets
+from typing import TYPE_CHECKING
+
 from django.db import transaction
 
 from sessions.models import Entitlement
 from sessions.services import ingest_accounting_event
 
 from .models import RadAcct, RadAcctSyncState, RadCheck, RadReply
+
+if TYPE_CHECKING:
+    from customers.models import Customer
 
 
 class RadiusProjectionService:
@@ -51,6 +57,29 @@ def sync_entitlement_to_radius(username: str, cleartext_password: str, entitleme
     if entitlement.customer and entitlement.customer.username != username:
         username = entitlement.customer.username
     RadiusProjectionService.sync_entitlement(entitlement=entitlement, cleartext_password=cleartext_password)
+
+
+def verify_radius_cleartext_password(*, customer: "Customer", cleartext_password: str) -> bool:
+    """
+    Return True if cleartext_password matches the projected RADIUS Cleartext-Password for the customer.
+    """
+    if not cleartext_password:
+        return False
+    check = (
+        RadCheck.objects.filter(
+            username=customer.username,
+            attribute="Cleartext-Password",
+        )
+        .values_list("value", flat=True)
+        .first()
+    )
+    if check is None:
+        return False
+    a = str(check).encode("utf-8")
+    b = cleartext_password.encode("utf-8")
+    if len(a) != len(b):
+        return False
+    return secrets.compare_digest(a, b)
 
 
 @transaction.atomic

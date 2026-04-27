@@ -9,7 +9,7 @@ from vouchers.models import Voucher, VoucherBatch
 
 
 class Command(BaseCommand):
-    help = "Seed demo data for local lab testing."
+    help = "Seed demo data for local lab testing. Base retail plans (1 day / week / month unlimited) are created by the plans.0004_default_unlimited_plans migration."
 
     def handle(self, *args, **options):
         speed_profile, _ = SpeedProfile.objects.get_or_create(

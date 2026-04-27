@@ -3,7 +3,9 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from payments.models import Payment
-from plans.models import Plan
+from plans.models import Plan, SpeedProfile
+from radius_integration.services import sync_entitlement_to_radius
+from sessions.models import Entitlement
 
 from .factories import CustomerFactory, VoucherFactory
 
@@ -16,6 +18,9 @@ def test_portal_login_get_shows_wi_fi_page_and_plans_link(client):
     assert b"/portal/packages/" in response.content
     assert b"Ananse WiFi" in response.content
     assert b"Connect to" in response.content and b"Wi" in response.content
+    assert b"MAC address" not in response.content
+    assert b"Redeem a voucher" in response.content
+    assert b"Sign in with username" in response.content
 
 
 @pytest.mark.django_db
@@ -25,12 +30,92 @@ def test_portal_login_redeems_voucher(client):
 
     response = client.post(
         "/portal/login/",
-        {"identity": customer.phone, "voucher_code": voucher.code, "mac_address": "AA:BB:CC:00:00:01"},
+        {
+            "auth_mode": "voucher",
+            "identity": customer.phone,
+            "voucher_code": voucher.code,
+        },
         follow=True,
     )
 
     assert response.status_code == 200
     assert b"Session Status" in response.content
+
+
+@pytest.mark.django_db
+def test_portal_password_login_succeeds(client):
+    sp = SpeedProfile.objects.create(
+        name="pw-login-speed",
+        up_rate_kbps=1024,
+        down_rate_kbps=2048,
+        mikrotik_rate_limit="1M/2M",
+    )
+    plan = Plan.objects.create(
+        name="pw-login-plan",
+        price=5,
+        duration_minutes=60,
+        speed_profile=sp,
+        idle_timeout_seconds=300,
+        session_timeout_seconds=1800,
+    )
+    customer = CustomerFactory(username="pw-portal-user", phone="+233241234500")
+    entitlement = Entitlement.objects.create(customer=customer, plan=plan, status="active")
+    sync_entitlement_to_radius(
+        username=customer.username,
+        cleartext_password="wifi-secret-xyz",
+        entitlement=entitlement,
+    )
+
+    response = client.post(
+        "/portal/login/",
+        {
+            "auth_mode": "password",
+            "identity": customer.phone,
+            "wifi_password": "wifi-secret-xyz",
+        },
+        follow=True,
+    )
+
+    assert response.status_code == 200
+    assert b"Session Status" in response.content
+
+
+@pytest.mark.django_db
+def test_portal_password_login_rejects_wrong_password(client):
+    sp = SpeedProfile.objects.create(
+        name="pw-bad-speed",
+        up_rate_kbps=1024,
+        down_rate_kbps=2048,
+        mikrotik_rate_limit="1M/2M",
+    )
+    plan = Plan.objects.create(
+        name="pw-bad-plan",
+        price=5,
+        duration_minutes=60,
+        speed_profile=sp,
+        idle_timeout_seconds=300,
+        session_timeout_seconds=1800,
+    )
+    customer = CustomerFactory(username="pw-bad-user", phone="+233241234501")
+    entitlement = Entitlement.objects.create(customer=customer, plan=plan, status="active")
+    sync_entitlement_to_radius(
+        username=customer.username,
+        cleartext_password="correct-pass",
+        entitlement=entitlement,
+    )
+
+    response = client.post(
+        "/portal/login/",
+        {
+            "auth_mode": "password",
+            "identity": customer.phone,
+            "wifi_password": "wrong-pass",
+        },
+    )
+
+    assert response.status_code == 200
+    assert b"Login failed" in response.content
+    assert b"Session Status" not in response.content
 
 
 @pytest.mark.django_db

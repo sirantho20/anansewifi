@@ -11,53 +11,82 @@
   <div class="max-w-xl mx-auto">
     <div class="text-center mb-8">
       <h2 class="text-2xl lg:text-3xl font-bold text-textPrimary mb-2">Connect to Wi‑Fi</h2>
-      <p class="text-textSecondary text-sm lg:text-base leading-relaxed">Enter the mobile or username on your account and your voucher code to get online. Need a voucher? Buy a package first, then redeem your code below.</p>
+      <p class="text-textSecondary text-sm lg:text-base leading-relaxed">Get online by redeeming a new voucher, or sign in with the username and password you use on the hotspot (for example your voucher code as the password if you have already connected before). Need a new voucher? Buy a package first, then use “Redeem a voucher” below.</p>
     </div>
 
-    <div class="bg-white rounded-2xl border border-borderLight shadow-sm p-6 lg:p-8">
-      <form method="post" class="space-y-5" novalidate>
-        {% csrf_token %}
-        <div>
-          <label for="id-identity" class="block text-sm font-medium text-textPrimary mb-1.5">Mobile or username</label>
-          <input
-            id="id-identity"
-            type="text"
-            name="identity"
-            value="{{ identity|default:'' }}"
-            required
-            autocomplete="username"
-            class="w-full rounded-lg border border-border bg-white px-4 py-3 text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="+233XXXXXXXXX or username"
-          >
-        </div>
-        <div>
-          <label for="id-voucher" class="block text-sm font-medium text-textPrimary mb-1.5">Voucher code</label>
-          <input
-            id="id-voucher"
-            type="text"
-            name="voucher_code"
-            required
-            autocomplete="one-time-code"
-            class="w-full rounded-lg border border-border bg-white px-4 py-3 text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="Enter your voucher"
-          >
-        </div>
-        <div>
-          <label for="id-mac" class="block text-sm font-medium text-textPrimary mb-1.5">Device MAC address <span class="text-textTertiary font-normal">(optional)</span></label>
-          <input
-            id="id-mac"
-            type="text"
-            name="mac_address"
-            class="w-full rounded-lg border border-border bg-white px-4 py-3 text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="AA:BB:CC:DD:EE:FF"
-            inputmode="text"
-            autocapitalize="characters"
-          >
-        </div>
-        <button type="submit" class="w-full min-h-[52px] rounded-xl bg-primary text-white font-semibold text-base hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors">
-          Redeem and connect
-        </button>
-      </form>
+    <div class="space-y-8">
+      <div class="bg-white rounded-2xl border border-borderLight shadow-sm p-6 lg:p-8">
+        <h3 class="text-lg font-semibold text-textPrimary mb-4">Redeem a voucher</h3>
+        <form method="post" class="space-y-5" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="auth_mode" value="voucher">
+          <div>
+            <label for="id-identity-voucher" class="block text-sm font-medium text-textPrimary mb-1.5">Mobile or username</label>
+            <input
+              id="id-identity-voucher"
+              type="text"
+              name="identity"
+              value="{{ identity|default:'' }}"
+              required
+              autocomplete="username"
+              class="w-full rounded-lg border border-border bg-white px-4 py-3 text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="+233XXXXXXXXX or username"
+            >
+          </div>
+          <div>
+            <label for="id-voucher" class="block text-sm font-medium text-textPrimary mb-1.5">Voucher code</label>
+            <input
+              id="id-voucher"
+              type="text"
+              name="voucher_code"
+              required
+              autocomplete="one-time-code"
+              class="w-full rounded-lg border border-border bg-white px-4 py-3 text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="Enter your voucher"
+            >
+          </div>
+          <button type="submit" class="w-full min-h-[52px] rounded-xl bg-primary text-white font-semibold text-base hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors">
+            Redeem and connect
+          </button>
+        </form>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-borderLight shadow-sm p-6 lg:p-8">
+        <h3 class="text-lg font-semibold text-textPrimary mb-1">Sign in with username and password</h3>
+        <p class="text-textTertiary text-sm mb-4">Use the same Wi‑Fi login and password you enter on the hotspot. If you are not sure, redeem your voucher above—your password is then usually your voucher code.</p>
+        <form method="post" class="space-y-5" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="auth_mode" value="password">
+          <div>
+            <label for="id-identity-password" class="block text-sm font-medium text-textPrimary mb-1.5">Mobile or username</label>
+            <input
+              id="id-identity-password"
+              type="text"
+              name="identity"
+              value="{{ identity|default:'' }}"
+              required
+              autocomplete="username"
+              class="w-full rounded-lg border border-border bg-white px-4 py-3 text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="+233XXXXXXXXX or username"
+            >
+          </div>
+          <div>
+            <label for="id-wifi-password" class="block text-sm font-medium text-textPrimary mb-1.5">Password</label>
+            <input
+              id="id-wifi-password"
+              type="password"
+              name="wifi_password"
+              required
+              autocomplete="current-password"
+              class="w-full rounded-lg border border-border bg-white px-4 py-3 text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="Wi‑Fi password"
+            >
+          </div>
+          <button type="submit" class="w-full min-h-[52px] rounded-xl bg-primary text-white font-semibold text-base hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors">
+            Sign in
+          </button>
+        </form>
+      </div>
     </div>
 
     <div class="mt-6 space-y-3">
