@@ -9,6 +9,7 @@ from customers.services import find_customer_by_identity
 from plans.models import Plan
 from payments.services import (
     PaymentProviderError,
+    find_customer_for_voucher_purchase,
     initialize_plan_purchase,
     verify_plan_purchase,
 )
@@ -75,9 +76,12 @@ def login_view(request):
         else:
             voucher_code = request.POST.get("voucher_code", "")
             try:
-                customer = find_customer_by_identity(identity)
+                customer = find_customer_for_voucher_purchase(voucher_code)
                 if not customer:
-                    raise ValueError("Customer not found for the provided username/mobile.")
+                    raise ValueError(
+                        "We couldn't match this voucher to a purchase. If you bought a package, "
+                        "enter the exact code from SMS, or contact support."
+                    )
                 redeem_voucher(voucher_code, customer, mac_address="")
                 AuditLog.objects.create(
                     actor=customer.phone or customer.username,
@@ -100,7 +104,11 @@ def login_view(request):
     return render(
         request,
         "portal/login.html",
-        {"identity": request.GET.get("identity", ""), "site_title": _portal_site_title()},
+        {
+            "identity": request.GET.get("identity", ""),
+            "site_title": _portal_site_title(),
+            "reveal_login_forms": request.method == "POST",
+        },
     )
 
 

@@ -2,7 +2,7 @@ import pytest
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from payments.models import Payment
+from payments.models import Payment, PaymentStatus
 from plans.models import Plan, SpeedProfile
 from radius_integration.services import sync_entitlement_to_radius
 from sessions.models import Entitlement
@@ -21,18 +21,28 @@ def test_portal_login_get_shows_wi_fi_page_and_plans_link(client):
     assert b"MAC address" not in response.content
     assert b"Redeem a voucher" in response.content
     assert b"Sign in with username" in response.content
+    assert b"data-portal-login-reveal" in response.content
+    assert b'id="portal-login-forms"' in response.content
+    assert b'class="space-y-8 hidden"' in response.content
 
 
 @pytest.mark.django_db
 def test_portal_login_redeems_voucher(client):
     customer = CustomerFactory(username="portaluser", phone="+233241234567")
     voucher = VoucherFactory()
+    Payment.objects.create(
+        customer=customer,
+        plan=voucher.plan,
+        voucher=voucher,
+        amount=voucher.plan.price,
+        status=PaymentStatus.SUCCESS,
+        provider="test",
+    )
 
     response = client.post(
         "/portal/login/",
         {
             "auth_mode": "voucher",
-            "identity": customer.phone,
             "voucher_code": voucher.code,
         },
         follow=True,

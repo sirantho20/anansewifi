@@ -48,3 +48,11 @@ Django business models are the source of truth. A projection layer syncs RADIUS-
   - `radacct` entries in Postgres
   - Django admin (`/admin/`) for `Session` and `AccountingRecord`
   - API dashboard summary (`/api/dashboard/summary/`)
+
+## Production router (MikroTik) and the public site
+
+- **Postgres for FreeRADIUS** comes from the same `DATABASE_URL` as Django; no duplicate `RADIUS_DB_*` env block is required unless you set `RADIUS_USE_DATABASE_URL=0` (see [radius/entrypoint.sh](../radius/entrypoint.sh)). Coolify: give the `radius` service the same `DATABASE_URL` as `web` / `worker` / `beat`.
+- The HTTPS portal (e.g. [anansewifi.shrt.fit](https://anansewifi.shrt.fit/)) is not the RADIUS transport. Point the router at **UDP 1812/1813** on the host running FreeRADIUS (VPS public IP, or a **DNS-only** A record; Cloudflare **proxied** hostnames do not carry RADIUS). Run `make check-radius-host` to see whether the name resolves to Cloudflare anycast.
+- In server `.env`, set `RADIUS_NAS_CLIENT_IP` to the **source IP of RADIUS packets** (usually the router WAN). The optional `clients-optional-nas` block is rendered when that variable is set.
+- Run `python manage.py ensure_nas_device <hotspot-gateway-ip>` so `NAS-IP-Address` in accounting matches a `NASDevice` row (often the LAN gateway, e.g. `192.168.10.1`).
+- Import [mikrotik_radius_anansewifi.rsc](../mikrotik_radius_anansewifi.rsc) on the router after editing `radAddr` and `radSec`, then `make radius-test-local` (with `make up` and seeded demo user) to run `radtest` against the local FreeRADIUS container.

@@ -148,7 +148,7 @@ MikroTik Hotspot is active on 192.168.10.0/24 (gateway 192.168.10.1). Use that n
 
 For **SSH to the router** via [mikrotik_helper.py](mikrotik_helper.py), `.env` uses **`ROUTER_IP`** when set; **`ROUTER_IP_2`** is optional fallback if `ROUTER_IP` is empty (e.g. alternate management address).
 
-To confirm the **rendered** Hotspot login HTML over the **Hotspot Wi‑Fi** path (not only files on the router), run [verify_hotspot_page.py](verify_hotspot_page.py) (it uses `curl --interface` to your Wi‑Fi interface, default **en0** on macOS, and checks the **Ananse** title and login form in the response).
+To confirm the **rendered** Hotspot login HTML over the **Hotspot Wi‑Fi** path (not only files on the router), run [verify_hotspot_page.py](verify_hotspot_page.py) (it uses `curl --interface` to your Wi‑Fi interface, default **en0** on macOS). By default it checks the **minimal** `login.html` (form + **Buy package** to `https://anansewifi.shrt.fit/packages/`). Use **`--local-form`** to assert the full two-field RADIUS form ([hotspot/login-local-form.html](hotspot/login-local-form.html)), or **`--redirect`** for a legacy pure redirect `login.html`.
 
 13. Captive portal login sheet not appearing (investigation)
 
@@ -169,3 +169,16 @@ On **mode=home**, **/ip proxy** is off by default. Walled-garden rules for Hotsp
 15. Lab Hotspot without a public FQDN (no browser-trusted cert)
 
 For a **lab** setup with **no** public DNS, keep **`/ip hotspot profile` cp-main** on **HTTP-first** flow: **`ssl-certificate=none`**, **`login-by=cookie,http-chap,http-pap`** (no **`https`** in `login-by` until you add a real cert). This avoids **invalid certificate** on the default **`http://login.hotspot/`** and **`http://192.168.10.1/login`** experience. The **`https-redirect`** property may be unavailable in some builds; if present and set to **no**, unauthenticated **HTTPS** to random sites is often **dropped** rather than redirected, so an automatic **“open browser to login”** is **unreliable** for **HTTPS-only** pages (**HSTS**, etc.); use **`http://neverssl.com`**, **`http://login.hotspot`**, or let the OS’s **HTTP** captive probe run (disable **DoH/Private DNS/VPN** on the client so it uses **192.168.10.1** for DNS). **iOS/Android** may still **not** show a system captive sheet without a **trusted** cert and full RFC 7710; open **Safari/Chrome** to **`http://…`** manually. Run [verify_hotspot_page.py](verify_hotspot_page.py) over the Hotspot interface (default **en0**); add **`--insecure`** only if you turn **TLS** back on the profile with a self-signed cert.
+
+16. Router-hosted Hotspot “login” page (production)
+
+The repo’s default [hotspot/login.html](hotspot/login.html) is a **minimal on-router sign-in** (centered code field, **Log in**, and a **Buy package** link to **`https://anansewifi.shrt.fit/packages/`**). Upload it to the router’s Hotspot `html-directory` (e.g. `flash/hotspot`). The full **two-field** MikroTik RADIUS template is kept for rollback as [hotspot/login-local-form.html](hotspot/login-local-form.html) (copy to `login.html` on the router if needed).
+
+**Prerequisites checklist**
+
+* §14: **`/system device-mode`**: **`proxy=yes`** (see [enable_proxy_device_mode.rsc](enable_proxy_device_mode.rsc) + confirm reboot) so **`/ip proxy`** and walled-garden are active.
+* §14: **`/interface bridge settings set [find name=bridge-main] use-ip-firewall=yes`**
+* **DNS:** guests receive the router as DNS; **`/ip dns allow-remote-requests=yes`** and upstream resolvers as needed so **`anansewifi.shrt.fit` resolves.
+* **Walled garden (HTTPS to the public portal):** import [hotspot_external_portal.rsc](hotspot_external_portal.rsc) once, or add manually: **`/ip hotspot walled-garden ip add dst-host=anansewifi.shrt.fit`**. If the page loads assets from other hostnames, add those **`dst-host`** lines too. See [docs/radius-flow.md](docs/radius-flow.md): RADIUS still completes on the **router**; the public site is the first stop only.
+
+**Verification:** [verify_hotspot_page.py](verify_hotspot_page.py) (default: minimal `login.html`), **`--local-form`**: two-field form from `login-local-form.html`, **`--redirect`**: legacy meta-refresh page to the portal root. [mikrotik_helper.py](mikrotik_helper.py) preset **`hotspot-diagnose`** to confirm walled-garden and Hotspot.

@@ -61,18 +61,16 @@ services:
       timeout: 5s
       retries: 5
 
+  # FreeRADIUS SQL uses the same DATABASE_URL as Django: radius/entrypoint.sh parses it into RADIUS_DB_* before rendering mods. Do not duplicate RADIUS_DB_* in compose.
   radius:
     build: ./radius
     env_file:
       - .env
     environment:
-      RADIUS_DB_HOST: ${RADIUS_DB_HOST}
-      RADIUS_DB_PORT: ${RADIUS_DB_PORT:-5432}
-      RADIUS_DB_NAME: ${RADIUS_DB_NAME}
-      RADIUS_DB_USER: ${RADIUS_DB_USER}
-      RADIUS_DB_PASSWORD: ${RADIUS_DB_PASSWORD}
       RADIUS_SQL_DIALECT: ${RADIUS_SQL_DIALECT:-postgresql}
       RADIUS_CLIENT_SECRET: ${RADIUS_CLIENT_SECRET:-ananse-radius-secret}
+      RADIUS_NAS_CLIENT_IP: ${RADIUS_NAS_CLIENT_IP:-}
+      RADIUS_NAS_CLIENT_SECRET: ${RADIUS_NAS_CLIENT_SECRET:-}
       LOG_NAMESPACE: base.radius
     labels:
       ananse.log.namespace: base.radius

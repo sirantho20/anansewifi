@@ -1,13 +1,19 @@
 #!/usr/bin/env python3
 """
 Fetch the MikroTik Hotspot login page over a specific interface (Wi‑Fi to 192.168.10.x)
-and verify the rendered HTML matches the expected Ananse portal (see hotspot/login.html).
+and verify the rendered HTML.
+
+Default: minimal on-router `login.html` (code field, Log in, Buy package link).
+Optional --local-form: two-field RADIUS form (see hotspot/login-local-form.html).
+Optional --redirect: legacy meta-refresh page to the portal root (older login.html style).
 
 Uses curl(1) so traffic is bound to the interface (macOS: --interface en0).
 
 Example:
   HOTSPOT_WIFI_IF=en0 python3 verify_hotspot_page.py
   python3 verify_hotspot_page.py --url http://login.hotspot/login
+  python3 verify_hotspot_page.py --local-form
+  python3 verify_hotspot_page.py --redirect
   python3 verify_hotspot_page.py --insecure  # if profile uses HTTPS/self-signed again
 """
 
@@ -21,9 +27,12 @@ import sys
 import tempfile
 from pathlib import Path
 
+EXTERNAL_PORTAL_URL = "https://anansewifi.shrt.fit/"
+PORTAL_PACKAGES_URL = "https://anansewifi.shrt.fit/packages/"
+
 
 def _run_curl(
-    url: str, interface: str, max_time: float, *, insecure: bool
+    url: str, interface: str, max_time: float, *, insecure: bool, location: bool
 ) -> tuple[int, str, str, str]:
     """
     Return (returncode, body, writeout, stderr).
@@ -32,12 +41,9 @@ def _run_curl(
     fd, path = tempfile.mkstemp(suffix=".html")
     os.close(fd)
     try:
-        # Lab default: profile is HTTP-first (no ssl-certificate on Hotspot profile).
-        # Use --insecure if you re-enable HTTPS on the profile with a self-signed cert.
         cmd = [
             "curl",
             "-sS",
-            "-L",
             "--connect-timeout",
             "8",
             "--max-time",
@@ -49,6 +55,8 @@ def _run_curl(
             "-w",
             "%{http_code}\n%{url_effective}",
         ]
+        if location:
+            cmd.insert(1, "-L")
         if insecure:
             cmd.insert(3, "-k")
         cmd.append(url)
@@ -68,8 +76,48 @@ def _run_curl(
             pass
 
 
-def verify_body(body: str) -> list[str]:
-    """Return list of human-readable failures; empty if OK."""
+def verify_minimal_router_login_body(body: str) -> list[str]:
+    """Verify default repo hotspot/login.html: code field, form, packages link."""
+    failures: list[str] = []
+    if not body.strip():
+        failures.append("empty response body")
+        return failures
+    if "<!DOCTYPE html>" not in body and "<!doctype html>" not in body.lower():
+        failures.append("missing HTML5 doctype")
+    if PORTAL_PACKAGES_URL not in body:
+        failures.append(f"missing packages link ({PORTAL_PACKAGES_URL})")
+    if "<form" not in body.lower():
+        failures.append("missing <form> (login form)")
+    if "hs_code" not in body:
+        failures.append("expected id=hs_code (code field)")
+    if not re.search(r'name\s*=\s*["\']username["\']', body, re.I):
+        failures.append("missing name=username (Hotspot login)")
+    if not re.search(r'name\s*=\s*["\']password["\']', body, re.I):
+        failures.append("missing name=password (PAP/CHAP)")
+    if "Buy package" not in body:
+        failures.append('expected "Buy package" link text')
+    return failures
+
+
+def verify_external_redirect_body(body: str) -> list[str]:
+    """Verify meta-redirect Hotspot page (optional legacy `login.html` style)."""
+    failures: list[str] = []
+    if not body.strip():
+        failures.append("empty response body")
+        return failures
+    if "<!DOCTYPE html>" not in body and "<!doctype html>" not in body.lower():
+        failures.append("missing HTML5 doctype")
+    if EXTERNAL_PORTAL_URL not in body and "anansewifi.shrt.fit" not in body:
+        failures.append(f"missing redirect target ({EXTERNAL_PORTAL_URL})")
+    if not re.search(
+        r'http-equiv\s*=\s*["\']refresh["\']', body, re.I
+    ) and EXTERNAL_PORTAL_URL not in body:
+        failures.append("expected meta refresh or portal URL in body")
+    return failures
+
+
+def verify_local_form_body(body: str) -> list[str]:
+    """Verify full Hotspot login form (repo hotspot/login-local-form.html)."""
     failures: list[str] = []
     if not body.strip():
         failures.append("empty response body")
@@ -84,7 +132,6 @@ def verify_body(body: str) -> list[str]:
     if not re.search(r'name\s*=\s*["\']password["\']', body, re.I):
         failures.append("missing name=password input (Hotspot login)")
     if "name=username" not in body.replace("'", '"') and 'name="username"' not in body:
-        # template may use single quotes
         if not re.search(r'name\s*=\s*["\']username["\']', body, re.I):
             failures.append("missing username field")
     return failures
@@ -115,7 +162,20 @@ def main() -> int:
         action="store_true",
         help="Pass curl -k (accept self-signed HTTPS) if Hotspot uses TLS again.",
     )
+    p.add_argument(
+        "--local-form",
+        action="store_true",
+        help="Expect the two-field on-router RADIUS form (login-local-form.html).",
+    )
+    p.add_argument(
+        "--redirect",
+        action="store_true",
+        help="Expect a meta-redirect to the portal root (legacy login.html).",
+    )
     args = p.parse_args()
+    if args.local_form and args.redirect:
+        print("Use only one of --local-form or --redirect.", file=sys.stderr)
+        return 2
 
     insecure = args.insecure or os.environ.get("HOTSPOT_CURL_INSECURE", "").lower() in (
         "1",
@@ -123,7 +183,7 @@ def main() -> int:
         "yes",
     )
     code, body, writeout, cerr = _run_curl(
-        args.url, args.interface, args.max_time, insecure=insecure
+        args.url, args.interface, args.max_time, insecure=insecure, location=True
     )
     if code != 0:
         print(f"curl failed (exit {code}): {cerr}", file=sys.stderr)
@@ -148,7 +208,18 @@ def main() -> int:
             file=sys.stderr,
         )
 
-    failures = verify_body(body)
+    if args.local_form:
+        failures = verify_local_form_body(body)
+        ok_msg = "OK: Hotspot login page HTML looks like the full Ananse RADIUS form (title, form, fields)."
+    elif args.redirect:
+        failures = verify_external_redirect_body(body)
+        ok_msg = "OK: Hotspot login page redirects to the external portal (anansewifi.shrt.fit)."
+    else:
+        failures = verify_minimal_router_login_body(body)
+        ok_msg = (
+            "OK: Hotspot login page looks like minimal on-router Ananse (code, Log in, packages link)."
+        )
+
     if failures:
         for f in failures:
             print(f"FAIL: {f}", file=sys.stderr)
@@ -156,7 +227,7 @@ def main() -> int:
         print(f"body_preview: {preview!r}...", file=sys.stderr)
         return 1
 
-    print("OK: Hotspot login page HTML looks like the Ananse portal (title, form, fields).")
+    print(ok_msg)
     return 0
 
 

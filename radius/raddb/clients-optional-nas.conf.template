@@ -1,0 +1,5 @@
+client ananse_wan {
+    ipaddr = __RADIUS_NAS_CLIENT_IP__
+    secret = __RADIUS_NAS_CLIENT_SECRET__
+    shortname = ananse-wan
+}

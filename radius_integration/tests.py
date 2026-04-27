@@ -4,6 +4,7 @@ from django.utils import timezone
 from customers.models import Customer
 from plans.models import Plan, SpeedProfile
 from sessions.models import Entitlement, Session
+from vouchers.models import Voucher, VoucherStatus
 
 from .models import RadAcct, RadCheck, RadReply
 from .services import (
@@ -48,6 +49,61 @@ class RadiusProjectionTests(TestCase):
         self.assertTrue(
             RadReply.objects.filter(
                 username="project-user",
+                attribute="Mikrotik-Rate-Limit",
+                value="1M/2M",
+            ).exists()
+        )
+
+    def test_sync_entitlement_projects_voucher_code_as_second_username(self):
+        speed_profile = SpeedProfile.objects.create(
+            name="VoucherDup",
+            up_rate_kbps=1024,
+            down_rate_kbps=2048,
+            mikrotik_rate_limit="1M/2M",
+        )
+        plan = Plan.objects.create(
+            name="Voucher Dup Plan",
+            price=5,
+            duration_minutes=60,
+            speed_profile=speed_profile,
+            idle_timeout_seconds=300,
+            session_timeout_seconds=1800,
+        )
+        customer = Customer.objects.create(username="dup-user", full_name="Dup User")
+        voucher = Voucher.objects.create(
+            code="ANW-DUP-RAD-001",
+            plan=plan,
+            status=VoucherStatus.REDEEMED,
+            redeemed_by=customer,
+        )
+        entitlement = Entitlement.objects.create(
+            customer=customer,
+            plan=plan,
+            voucher=voucher,
+            status="active",
+        )
+        sync_entitlement_to_radius(
+            username=customer.username,
+            cleartext_password=voucher.code,
+            entitlement=entitlement,
+        )
+        self.assertTrue(
+            RadCheck.objects.filter(
+                username="dup-user",
+                attribute="Cleartext-Password",
+                value=voucher.code,
+            ).exists()
+        )
+        self.assertTrue(
+            RadCheck.objects.filter(
+                username=voucher.code,
+                attribute="Cleartext-Password",
+                value=voucher.code,
+            ).exists()
+        )
+        self.assertTrue(
+            RadReply.objects.filter(
+                username=voucher.code,
                 attribute="Mikrotik-Rate-Limit",
                 value="1M/2M",
             ).exists()

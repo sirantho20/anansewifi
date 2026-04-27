@@ -489,3 +489,20 @@ def lookup_customer_by_mobile(mobile: str) -> Customer | None:
     except ValueError:
         return None
     return Customer.objects.filter(phone=normalized_mobile).first()
+
+
+def find_customer_for_voucher_purchase(voucher_code: str) -> Customer | None:
+    """Resolve the buyer for a voucher issued via a successful plan purchase."""
+    code = (voucher_code or "").strip()
+    if not code:
+        return None
+    payment = (
+        Payment.objects.filter(
+            status=PaymentStatus.SUCCESS,
+            voucher__code=code,
+        )
+        .select_related("customer")
+        .order_by("-created_at")
+        .first()
+    )
+    return payment.customer if payment else None

@@ -9,30 +9,32 @@
   {% include "portal/includes/plans_messages.html" %}
 
   <div class="max-w-xl mx-auto">
+    <div class="mb-6 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-textSecondary" role="note">
+      <p class="font-medium text-textPrimary mb-1">On the Ananse Wi‑Fi network?</p>
+      <p class="leading-relaxed">Use the forms below, then open the <strong>hotspot sign-in page</strong> on the router to get online: <a href="http://login.hotspot/login" class="text-primary font-medium underline">http://login.hotspot/login</a>. Enter the same username and password you use for Wi‑Fi (often your voucher code).</p>
+    </div>
     <div class="text-center mb-8">
       <h2 class="text-2xl lg:text-3xl font-bold text-textPrimary mb-2">Connect to Wi‑Fi</h2>
-      <p class="text-textSecondary text-sm lg:text-base leading-relaxed">Get online by redeeming a new voucher, or sign in with the username and password you use on the hotspot (for example your voucher code as the password if you have already connected before). Need a new voucher? Buy a package first, then use “Redeem a voucher” below.</p>
+      <p class="text-textSecondary text-sm lg:text-base leading-relaxed mb-6">Tap <strong>Log in</strong> to redeem your voucher or sign in with your hotspot password. Need a package? Use the link below to buy and get your code by SMS.</p>
+      <div id="portal-login-step1" class="{% if reveal_login_forms %}hidden{% endif %}">
+        <button
+          type="button"
+          class="w-full max-w-sm mx-auto min-h-[52px] rounded-xl bg-primary text-white font-semibold text-base hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
+          data-portal-login-reveal
+          aria-expanded="{% if reveal_login_forms %}true{% else %}false{% endif %}"
+          aria-controls="portal-login-forms"
+        >
+          Log in
+        </button>
+      </div>
     </div>
 
-    <div class="space-y-8">
+    <div id="portal-login-forms" class="space-y-8 {% if not reveal_login_forms %}hidden{% endif %}">
       <div class="bg-white rounded-2xl border border-borderLight shadow-sm p-6 lg:p-8">
         <h3 class="text-lg font-semibold text-textPrimary mb-4">Redeem a voucher</h3>
         <form method="post" class="space-y-5" novalidate>
           {% csrf_token %}
           <input type="hidden" name="auth_mode" value="voucher">
-          <div>
-            <label for="id-identity-voucher" class="block text-sm font-medium text-textPrimary mb-1.5">Mobile or username</label>
-            <input
-              id="id-identity-voucher"
-              type="text"
-              name="identity"
-              value="{{ identity|default:'' }}"
-              required
-              autocomplete="username"
-              class="w-full rounded-lg border border-border bg-white px-4 py-3 text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="+233XXXXXXXXX or username"
-            >
-          </div>
           <div>
             <label for="id-voucher" class="block text-sm font-medium text-textPrimary mb-1.5">Voucher code</label>
             <input
@@ -53,12 +55,12 @@
 
       <div class="bg-white rounded-2xl border border-borderLight shadow-sm p-6 lg:p-8">
         <h3 class="text-lg font-semibold text-textPrimary mb-1">Sign in with username and password</h3>
-        <p class="text-textTertiary text-sm mb-4">Use the same Wi‑Fi login and password you enter on the hotspot. If you are not sure, redeem your voucher above—your password is then usually your voucher code.</p>
+        <p class="text-textTertiary text-sm mb-4">Use the same Wi‑Fi login and password you use on the hotspot. If you are not sure, redeem your voucher above—your password is then usually your voucher code.</p>
         <form method="post" class="space-y-5" novalidate>
           {% csrf_token %}
           <input type="hidden" name="auth_mode" value="password">
           <div>
-            <label for="id-identity-password" class="block text-sm font-medium text-textPrimary mb-1.5">Mobile or username</label>
+            <label for="id-identity-password" class="block text-sm font-medium text-textPrimary mb-1.5">Username</label>
             <input
               id="id-identity-password"
               type="text"
@@ -67,7 +69,7 @@
               required
               autocomplete="username"
               class="w-full rounded-lg border border-border bg-white px-4 py-3 text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="+233XXXXXXXXX or username"
+              placeholder="Your Wi‑Fi username"
             >
           </div>
           <div>
@@ -98,6 +100,33 @@
     </div>
   </div>
 </main>
+
+<noscript>
+  <style>
+    #portal-login-step1 { display: none !important; }
+    #portal-login-forms { display: block !important; }
+  </style>
+</noscript>
+
+<script>
+(function () {
+  var main = document.getElementById("main-content");
+  if (!main) return;
+  main.addEventListener("click", function (e) {
+    var r = e.target && e.target.closest && e.target.closest("[data-portal-login-reveal]");
+    if (!r) return;
+    e.preventDefault();
+    var step1 = document.getElementById("portal-login-step1");
+    var forms = document.getElementById("portal-login-forms");
+    if (!step1 || !forms) return;
+    step1.classList.add("hidden");
+    forms.classList.remove("hidden");
+    r.setAttribute("aria-expanded", "true");
+    var first = forms.querySelector("input:not([type=hidden])");
+    if (first) first.focus();
+  });
+})();
+</script>
 
 {% include "portal/includes/plans_footer.html" %}
 {% endblock %}

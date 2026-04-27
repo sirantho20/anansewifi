@@ -2,6 +2,7 @@ from django.db import transaction
 
 from customers.models import Customer
 from network.models import NASDevice
+from vouchers.models import Voucher
 
 from .models import AccountingRecord, Session
 
@@ -23,7 +24,14 @@ def ingest_accounting_event(payload: dict) -> AccountingRecord:
             session.nas = nas
             session_update_fields.append("nas")
     if not session.customer:
-        customer = Customer.objects.filter(username=payload["username"]).first()
+        un = payload["username"]
+        customer = Customer.objects.filter(username=un).first()
+        if not customer:
+            voucher = (
+                Voucher.objects.filter(code=un).select_related("redeemed_by").first()
+            )
+            if voucher and voucher.redeemed_by_id:
+                customer = voucher.redeemed_by
         if customer:
             session.customer = customer
             session_update_fields.append("customer")

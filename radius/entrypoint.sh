@@ -37,7 +37,8 @@ for key, val in (
       ;;
   esac
 fi
-
+# If DATABASE_URL was parsed above, RADIUS_DB_* are set and these lines are no-ops (var is non-empty).
+# If there is no PostgreSQL URL, fall back to POSTGRES_* / legacy defaults (e.g. local compose with an embedded db hostname).
 : "${RADIUS_DB_HOST:=${POSTGRES_HOST:-db}}"
 : "${RADIUS_DB_PORT:=${POSTGRES_PORT:-5432}}"
 : "${RADIUS_DB_NAME:=${POSTGRES_DB:-ananse_wifi}}"
@@ -45,6 +46,11 @@ fi
 : "${RADIUS_DB_PASSWORD:=${POSTGRES_PASSWORD:-ananse}}"
 : "${RADIUS_SQL_DIALECT:=postgresql}"
 : "${RADIUS_CLIENT_SECRET:=ananse-radius-secret}"
+: "${RADIUS_NAS_CLIENT_SECRET:=$RADIUS_CLIENT_SECRET}"
+# Docker may pass empty string; treat as "use main RADIUS secret".
+if [ -z "$RADIUS_NAS_CLIENT_SECRET" ]; then
+  RADIUS_NAS_CLIENT_SECRET="$RADIUS_CLIENT_SECRET"
+fi
 
 render_template() {
   template_path="$1"
@@ -61,6 +67,13 @@ render_template() {
 }
 
 render_template /opt/ananse-radius/clients.conf.template /etc/freeradius/clients.conf
+# Optional: allow the production NAS (RADIUS source IP, usually router WAN) when RADIUS_NAS_CLIENT_IP is set.
+if [ -n "${RADIUS_NAS_CLIENT_IP:-}" ]; then
+  sed \
+    -e "s|__RADIUS_NAS_CLIENT_IP__|${RADIUS_NAS_CLIENT_IP}|g" \
+    -e "s|__RADIUS_NAS_CLIENT_SECRET__|${RADIUS_NAS_CLIENT_SECRET}|g" \
+    /opt/ananse-radius/clients-optional-nas.conf.template >> /etc/freeradius/clients.conf
+fi
 render_template /opt/ananse-radius/sql.template /etc/freeradius/mods-enabled/sql
 cp /opt/ananse-radius/default.site /etc/freeradius/sites-enabled/default
 

@@ -12,6 +12,30 @@ if TYPE_CHECKING:
     from customers.models import Customer
 
 
+def _write_radcheck_reply_for_username(*, username: str, cleartext_password: str, plan) -> None:
+    RadCheck.objects.create(
+        username=username,
+        attribute="Cleartext-Password",
+        value=cleartext_password,
+    )
+    if plan.speed_profile and plan.speed_profile.mikrotik_rate_limit:
+        RadReply.objects.create(
+            username=username,
+            attribute="Mikrotik-Rate-Limit",
+            value=plan.speed_profile.mikrotik_rate_limit,
+        )
+    RadReply.objects.create(
+        username=username,
+        attribute="Session-Timeout",
+        value=str(plan.session_timeout_seconds),
+    )
+    RadReply.objects.create(
+        username=username,
+        attribute="Idle-Timeout",
+        value=str(plan.idle_timeout_seconds),
+    )
+
+
 class RadiusProjectionService:
     @staticmethod
     @transaction.atomic
@@ -19,32 +43,28 @@ class RadiusProjectionService:
         if not entitlement.customer_id:
             return
 
+        entitlement = (
+            Entitlement.objects.select_related("customer", "plan", "plan__speed_profile", "voucher")
+            .get(pk=entitlement.pk)
+        )
         username = entitlement.customer.username
         plan = entitlement.plan
-        RadCheck.objects.filter(username=username).delete()
-        RadReply.objects.filter(username=username).delete()
+        usernames_to_clear: set[str] = {username}
+        if entitlement.voucher_id and entitlement.voucher and entitlement.voucher.code:
+            usernames_to_clear.add(str(entitlement.voucher.code))
+        RadCheck.objects.filter(username__in=usernames_to_clear).delete()
+        RadReply.objects.filter(username__in=usernames_to_clear).delete()
 
-        RadCheck.objects.create(
-            username=username,
-            attribute="Cleartext-Password",
-            value=cleartext_password,
+        _write_radcheck_reply_for_username(
+            username=username, cleartext_password=cleartext_password, plan=plan
         )
-        if plan.speed_profile and plan.speed_profile.mikrotik_rate_limit:
-            RadReply.objects.create(
-                username=username,
-                attribute="Mikrotik-Rate-Limit",
-                value=plan.speed_profile.mikrotik_rate_limit,
+        vcode = None
+        if entitlement.voucher_id and entitlement.voucher and entitlement.voucher.code:
+            vcode = str(entitlement.voucher.code)
+        if vcode and vcode != username:
+            _write_radcheck_reply_for_username(
+                username=vcode, cleartext_password=cleartext_password, plan=plan
             )
-        RadReply.objects.create(
-            username=username,
-            attribute="Session-Timeout",
-            value=str(plan.session_timeout_seconds),
-        )
-        RadReply.objects.create(
-            username=username,
-            attribute="Idle-Timeout",
-            value=str(plan.idle_timeout_seconds),
-        )
 
     @staticmethod
     @transaction.atomic

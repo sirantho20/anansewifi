@@ -13,7 +13,7 @@
 `radius` is built from `radius/Dockerfile` and configured to:
 - read auth policy from `radcheck` and `radreply`
 - write accounting rows to `radacct`
-- use DB credentials from `.env` (`RADIUS_DB_*`)
+- use the same `DATABASE_URL` as the app: `radius/entrypoint.sh` maps it to `rlm_sql` (set `RADIUS_USE_DATABASE_URL=0` and discrete `RADIUS_DB_*` only if you must bypass the URL)
 
 ## Local workflow
 
