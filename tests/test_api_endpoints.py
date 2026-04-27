@@ -2,17 +2,19 @@ import pytest
 from unittest.mock import patch
 from rest_framework.test import APIClient
 
+from plans.models import Plan
 from payments.models import Payment, PaymentStatus
 from .factories import CustomerFactory, PlanFactory, VoucherFactory
 
 
 @pytest.mark.django_db
 def test_plans_api_returns_data():
+    before = Plan.objects.count()
     PlanFactory()
     client = APIClient()
     response = client.get("/api/plans/")
     assert response.status_code == 200
-    assert response.data["count"] == 1
+    assert response.data["count"] == before + 1
 
 
 @pytest.mark.django_db

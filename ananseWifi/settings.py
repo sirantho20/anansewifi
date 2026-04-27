@@ -1,12 +1,19 @@
 """Django settings for the Ananse WiFi platform."""
 from pathlib import Path
 import os
+import sys
 from datetime import timedelta
 
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# pytest-django imports settings in pytest_load_initial_conftests before conftest.
+# Use SQLite in test runs to match `make test` (no default Postgres in compose), unless
+# PYTEST_USE_POSTGRES=1 to exercise DATABASE_URL/POSTGRES_*.
+if not os.environ.get("PYTEST_USE_POSTGRES") and "pytest" in sys.modules:
+    os.environ["DJANGO_USE_SQLITE"] = "1"
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-insecure-key-change-me")
 DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"

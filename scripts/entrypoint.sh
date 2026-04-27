@@ -25,10 +25,26 @@ if h:
     fi
   fi
   if [ -n "$PG_HOST" ] && [ -n "$PG_PORT" ]; then
-    echo "Waiting for PostgreSQL at ${PG_HOST}:${PG_PORT}..."
-    until nc -z "$PG_HOST" "$PG_PORT"; do
-      sleep 1
+    _max="${PG_WAIT_TIMEOUT_SECONDS:-120}"
+    _interval="${PG_WAIT_PROGRESS_INTERVAL:-10}"
+    echo "Waiting for PostgreSQL at ${PG_HOST}:${PG_PORT} (max ${_max}s)..."
+    _ok=0
+    _n=0
+    while [ "$_n" -lt "$_max" ]; do
+      if nc -z "$PG_HOST" "$PG_PORT" 2>/dev/null; then
+        _ok=1
+        break
+      fi
+      _n=$((_n + 1))
+      if [ "$_interval" -gt 0 ] && [ $((_n % _interval)) -eq 0 ]; then
+        echo "Still waiting for PostgreSQL at ${PG_HOST}:${PG_PORT}... (${_n}s of ${_max}s max)"
+      fi
+      [ "$_n" -lt "$_max" ] && sleep 1
     done
+    if [ "$_ok" != "1" ]; then
+      echo "Error: could not connect to PostgreSQL at ${PG_HOST}:${PG_PORT} after ${_max}s. Check firewall, listen_addresses, and DATABASE_URL / POSTGRES_*." >&2
+      exit 1
+    fi
   fi
 fi
 
