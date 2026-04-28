@@ -40,5 +40,5 @@ class VoucherFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Voucher
 
-    code = factory.Sequence(lambda n: f"ANW-{n:05d}")
+    code = factory.Sequence(lambda n: f"A{n % 100_000:05d}")
     plan = factory.SubFactory(PlanFactory)

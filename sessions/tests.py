@@ -26,7 +26,7 @@ class IngestAccountingEventTests(TestCase):
         )
         customer = Customer.objects.create(username="acct-msisdn", full_name="Acct User")
         voucher = Voucher.objects.create(
-            code="ANW-ACCT-VC-01",
+            code="ACCT01",
             plan=plan,
             status=VoucherStatus.REDEEMED,
             redeemed_by=customer,

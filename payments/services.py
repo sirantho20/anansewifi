@@ -9,11 +9,10 @@ from urllib import error, parse, request
 import requests
 from django.conf import settings
 from django.db import transaction
-from django.utils import timezone
-
 from customers.models import Customer
 from customers.services import get_or_create_customer, normalize_mobile
 from plans.models import Plan
+from vouchers.codes import generate_voucher_code, normalize_voucher_code
 from vouchers.models import Voucher
 
 from .models import Payment, PaymentStatus
@@ -261,11 +260,6 @@ def _decimal_to_pesewas(amount: Decimal) -> int:
     return int((amount * Decimal("100")).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
 
-def _generate_voucher_code() -> str:
-    token = timezone.now().strftime("%y%m%d%H%M%S%f")[-10:]
-    return f"ANW-PUR-{token}"
-
-
 def _build_customer_email(customer: Customer) -> str:
     if customer.email:
         return customer.email
@@ -380,7 +374,7 @@ def _validate_transaction(payment: Payment, paystack_payload: dict) -> None:
 def _create_voucher_for_payment(payment: Payment) -> Voucher:
     attempts = 0
     while attempts < 5:
-        code = _generate_voucher_code()
+        code = generate_voucher_code()
         if not Voucher.objects.filter(code=code).exists():
             return Voucher.objects.create(
                 code=code,
@@ -493,7 +487,7 @@ def lookup_customer_by_mobile(mobile: str) -> Customer | None:
 
 def find_customer_for_voucher_purchase(voucher_code: str) -> Customer | None:
     """Resolve the buyer for a voucher issued via a successful plan purchase."""
-    code = (voucher_code or "").strip()
+    code = normalize_voucher_code(voucher_code)
     if not code:
         return None
     payment = (

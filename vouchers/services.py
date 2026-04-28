@@ -7,6 +7,7 @@ from django.utils import timezone
 from radius_integration.services import sync_entitlement_to_radius
 from sessions.models import Entitlement
 
+from .codes import normalize_voucher_code
 from .models import Voucher
 
 if TYPE_CHECKING:
@@ -20,6 +21,7 @@ class VoucherRedemptionResult:
 
 
 def redeem_voucher(code: str, customer: "Customer", mac_address: str = "") -> VoucherRedemptionResult:
+    code = normalize_voucher_code(code)
     with transaction.atomic():
         voucher = (
             Voucher.objects.select_related("plan")

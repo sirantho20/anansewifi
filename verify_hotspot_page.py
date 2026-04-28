@@ -5,6 +5,7 @@ and verify the rendered HTML.
 
 Default: minimal on-router `login.html` (code field, Log in, Buy package link).
 Optional --local-form: two-field RADIUS form (see hotspot/login-local-form.html).
+Optional --user-login: hotspot/user_login.html (same checks + Account sign in title).
 Optional --redirect: legacy meta-refresh page to the portal root (older login.html style).
 
 Uses curl(1) so traffic is bound to the interface (macOS: --interface en0).
@@ -137,6 +138,14 @@ def verify_local_form_body(body: str) -> list[str]:
     return failures
 
 
+def verify_user_login_body(body: str) -> list[str]:
+    """Verify repo hotspot/user_login.html (username/password form + CHAP script)."""
+    failures = verify_local_form_body(body)
+    if not failures and "Account sign in" not in body:
+        failures.append('expected user_login marker "Account sign in" (title)')
+    return failures
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description="Verify Hotspot login HTML over Wi‑Fi interface.")
     p.add_argument(
@@ -172,9 +181,15 @@ def main() -> int:
         action="store_true",
         help="Expect a meta-redirect to the portal root (legacy login.html).",
     )
+    p.add_argument(
+        "--user-login",
+        action="store_true",
+        help="Expect user_login.html (default URL …/user_login.html); same RADIUS fields as --local-form.",
+    )
     args = p.parse_args()
-    if args.local_form and args.redirect:
-        print("Use only one of --local-form or --redirect.", file=sys.stderr)
+    mode_flags = [args.redirect, args.local_form, args.user_login]
+    if sum(bool(x) for x in mode_flags) > 1:
+        print("Use only one of --local-form, --user-login, or --redirect.", file=sys.stderr)
         return 2
 
     insecure = args.insecure or os.environ.get("HOTSPOT_CURL_INSECURE", "").lower() in (
@@ -182,8 +197,14 @@ def main() -> int:
         "true",
         "yes",
     )
+    curl_url = args.url
+    if args.user_login:
+        base = curl_url.split("?", 1)[0].rstrip("/")
+        if base == "http://login.hotspot":
+            curl_url = "http://login.hotspot/user_login.html"
+
     code, body, writeout, cerr = _run_curl(
-        args.url, args.interface, args.max_time, insecure=insecure, location=True
+        curl_url, args.interface, args.max_time, insecure=insecure, location=True
     )
     if code != 0:
         print(f"curl failed (exit {code}): {cerr}", file=sys.stderr)
@@ -211,6 +232,9 @@ def main() -> int:
     if args.local_form:
         failures = verify_local_form_body(body)
         ok_msg = "OK: Hotspot login page HTML looks like the full Ananse RADIUS form (title, form, fields)."
+    elif args.user_login:
+        failures = verify_user_login_body(body)
+        ok_msg = "OK: Hotspot page matches user_login.html (username/password → RADIUS form + CHAP)."
     elif args.redirect:
         failures = verify_external_redirect_body(body)
         ok_msg = "OK: Hotspot login page redirects to the external portal (anansewifi.shrt.fit)."

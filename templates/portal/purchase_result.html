@@ -8,30 +8,64 @@
 <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
   {% include "portal/includes/plans_messages.html" %}
 
-  <div class="max-w-2xl mx-auto">
-    <h2 class="text-2xl lg:text-3xl font-bold text-textPrimary mb-6">Purchase successful</h2>
+  <div class="max-w-xl mx-auto text-center">
+    <h2 class="text-2xl lg:text-3xl font-bold text-textPrimary mb-8">Purchase successful</h2>
 
-    <div class="bg-white rounded-2xl border border-borderLight shadow-sm p-6 lg:p-8 space-y-4">
-      <p class="text-textPrimary"><span class="text-textTertiary text-sm">Name</span><br><span class="font-medium">{{ customer.full_name }}</span></p>
-      <p class="text-textPrimary"><span class="text-textTertiary text-sm">Mobile</span><br><span class="font-medium">{{ customer.phone }}</span></p>
-      <p class="text-textPrimary"><span class="text-textTertiary text-sm">Plan</span><br><span class="font-medium">{{ payment.plan.name }}</span></p>
-      <p class="text-textPrimary"><span class="text-textTertiary text-sm">Payment reference</span><br><span class="font-mono text-sm break-all">{{ payment.provider_reference }}</span></p>
+    <div class="bg-white rounded-2xl border border-borderLight shadow-sm p-6 lg:p-8 space-y-8 flex flex-col items-center text-center">
+      <div class="space-y-6 w-full text-center">
+        <div>
+          <p class="text-textTertiary text-sm font-medium mb-2">Name</p>
+          <p class="text-textPrimary text-lg font-medium">{{ customer.full_name }}</p>
+        </div>
+        <div>
+          <p class="text-textTertiary text-sm font-medium mb-2">Plan</p>
+          <p class="text-textPrimary text-lg font-medium">{{ payment.plan.name }}</p>
+          {% with summary=payment.plan.purchase_validity_summary %}
+            {% if summary %}
+              <p class="text-textSecondary mt-2 text-base">{{ summary }}</p>
+            {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+
       {% if voucher %}
-        <p class="text-textPrimary"><span class="text-textTertiary text-sm">Your voucher code</span><br><span class="font-mono text-lg font-semibold text-primary">{{ voucher.code }}</span></p>
+        <div class="rounded-xl border-2 border-primary/30 bg-primary/5 p-6 lg:p-8 w-full text-center">
+          <p class="text-textTertiary text-sm font-medium mb-4">Voucher code</p>
+          <p class="font-mono text-4xl lg:text-6xl font-bold tracking-wider text-primary uppercase break-all leading-tight">{{ voucher.code }}</p>
+        </div>
+
+        <form
+          method="post"
+          action="{% url 'home' %}"
+          class="w-full flex flex-col items-center gap-4"
+          data-purchase-login
+        >
+          {% csrf_token %}
+          <input type="hidden" name="auth_mode" value="voucher">
+          <input type="hidden" name="voucher_code" value="{{ voucher.code }}">
+          <button
+            type="submit"
+            class="inline-flex w-full min-h-[52px] max-w-md items-center justify-center rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
+          >
+            Login with Voucher
+          </button>
+        </form>
+
+        <script>
+        (function () {
+          var f = document.querySelector("form[data-purchase-login]");
+          if (!f) return;
+          f.addEventListener("submit", function () {
+            var btn = f.querySelector('button[type="submit"]');
+            if (btn) btn.disabled = true;
+          });
+        })();
+        </script>
       {% else %}
-        <p class="text-error text-sm">No voucher was created. Please contact support.</p>
+        <p class="text-error text-sm w-full">No voucher was created. Please contact support.</p>
       {% endif %}
-      {% if sms_sent %}
-        <p class="text-success text-sm">SMS sent to your phone successfully.</p>
-      {% else %}
-        <p class="text-warning text-sm">SMS delivery failed: {{ sms_error|default:"Unknown error" }}</p>
-      {% endif %}
-      <a href="{% url 'home' %}?identity={{ login_identity|urlencode }}" class="inline-flex w-full min-h-[52px] items-center justify-center rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors">
-        Go to Wi‑Fi login
-      </a>
     </div>
   </div>
 </main>
 
-{% include "portal/includes/plans_footer.html" %}
 {% endblock %}

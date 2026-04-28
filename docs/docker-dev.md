@@ -40,7 +40,7 @@ Compose automatically merges `docker-compose.override.yml` with `docker-compose.
 - stream logs: `make logs`
 - stop stack: `make down`
 - radius logs: `docker compose logs -f radius`
-- radius auth simulation: `docker compose exec radius radtest demo-customer ANW-DEMO-001 127.0.0.1 0 ananse-radius-secret`
+- radius auth simulation: `docker compose exec radius radtest demo-customer DEMO01 127.0.0.1 0 ananse-radius-secret`
 
 ## Rebuild loop
 

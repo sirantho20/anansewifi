@@ -130,7 +130,7 @@ def main() -> int:
     parser.add_argument(
         "--pass",
         dest="pass_",
-        default="ANW-DEMO-001",
+        default="DEMO01",
         help="radtest password",
     )
     args = parser.parse_args()

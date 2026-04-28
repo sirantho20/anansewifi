@@ -121,4 +121,20 @@
   /ip hotspot walled-garden ip add dst-host=anansewifi.shrt.fit comment="Ananse external portal (HTTPS pre-login)"
 }
 
+:if ([:len [/ip hotspot walled-garden ip find dst-host="paystack.com"]] = 0) do={
+  /ip hotspot walled-garden ip add dst-host=paystack.com comment="Paystack apex .com (HTTPS pre-login)"
+}
+
+:if ([:len [/ip hotspot walled-garden ip find dst-host="*.paystack.com"]] = 0) do={
+  /ip hotspot walled-garden ip add dst-host="*.paystack.com" comment="Paystack subdomains .com (HTTPS pre-login)"
+}
+
+:if ([:len [/ip hotspot walled-garden ip find dst-host="paystack.co"]] = 0) do={
+  /ip hotspot walled-garden ip add dst-host=paystack.co comment="Paystack apex .co (HTTPS pre-login)"
+}
+
+:if ([:len [/ip hotspot walled-garden ip find dst-host="*.paystack.co"]] = 0) do={
+  /ip hotspot walled-garden ip add dst-host="*.paystack.co" comment="Paystack subdomains .co api/js etc (HTTPS pre-login)"
+}
+
 :put "router_bootstrap_lab: done. If walled-garden inactivated, import enable_proxy_device_mode.rsc + confirm reboot."

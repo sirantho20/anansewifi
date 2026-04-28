@@ -33,7 +33,7 @@ FreeRADIUS writes `radacct`, and Django consumes those records so billing workfl
 ## Demo workflow
 
 - Use seeded user `demo-customer`
-- Redeem a seeded voucher `ANW-DEMO-001`
+- Redeem a seeded voucher `DEMO01`
 - Confirm entitlement/session behavior in admin and API endpoints
 
 ## Key commands

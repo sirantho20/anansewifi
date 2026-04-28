@@ -34,7 +34,7 @@ def test_sensitive_api_endpoints_require_admin_permissions():
 
     redeem_response = api_client.post(
         "/api/vouchers/redeem/",
-        {"code": "ANW-DOES-NOT-EXIST", "username": customer.username},
+        {"code": "XXXXXX", "username": customer.username},
         format="json",
     )
     assert redeem_response.status_code == 404

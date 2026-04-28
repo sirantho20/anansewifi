@@ -159,4 +159,76 @@ def test_purchase_callback_accepts_trxref_query_param(mock_verify_purchase, clie
 
     assert response.status_code == 200
     assert b"Purchase successful" in response.content
+    assert voucher.code.encode() in response.content
+    assert b"Login with Voucher" in response.content
+    assert b'name="auth_mode"' in response.content
+    assert b'value="voucher"' in response.content
+    assert b'name="voucher_code"' in response.content
     mock_verify_purchase.assert_called_once_with("ANW-TRXREF-001")
+
+
+@pytest.mark.django_db
+def test_portal_purchase_start_invalid_mobile_shows_validation_error(client):
+    plan = Plan.objects.create(
+        name="Buy Invalid Mobile Plan",
+        price="5.00",
+        billing_type="voucher",
+        quota_type="duration",
+        duration_minutes=60,
+        is_active=True,
+    )
+    response = client.post(
+        "/portal/purchase/start/",
+        {
+            "plan_id": str(plan.id),
+            "full_name": "Test User",
+            "mobile": "not-a-ghana-number",
+        },
+        follow=True,
+    )
+
+    assert response.status_code == 200
+    assert b"Invalid mobile number format" in response.content
+
+
+@pytest.mark.django_db
+@patch("portal.views.initialize_plan_purchase")
+def test_portal_purchase_start_redirects_to_paystack_checkout(mock_initialize_plan_purchase, client):
+    customer = CustomerFactory(phone="+233241234588")
+    plan = Plan.objects.create(
+        name="Checkout Redirect Plan",
+        price="5.00",
+        billing_type="voucher",
+        quota_type="duration",
+        duration_minutes=60,
+        is_active=True,
+    )
+    mock_initialize_plan_purchase.return_value = SimpleNamespace(
+        customer=customer,
+        payment=SimpleNamespace(id=1001),
+        authorization_url="https://checkout.paystack.com/mock-verify-path",
+        access_code="mock_access_code",
+        reference="mock-ref-portal-flow",
+    )
+
+    response = client.post(
+        "/portal/purchase/start/",
+        {
+            "plan_id": str(plan.id),
+            "full_name": "Paid Customer",
+            "mobile": "0241555888",
+        },
+        follow=False,
+        HTTP_HOST="127.0.0.1:18080",
+    )
+
+    assert response.status_code == 302
+    assert response["Location"] == "https://checkout.paystack.com/mock-verify-path"
+    mock_initialize_plan_purchase.assert_called_once()
+    kwargs = mock_initialize_plan_purchase.call_args.kwargs
+    cu = kwargs.get("callback_url", "")
+    assert cu.startswith("http://127.0.0.1:18080"), (
+        "Paystack redirect must hit the bound host:port so browsers do not GET port 80. "
+        f"Got callback_url={cu!r}"
+    )
+    assert "/portal/purchase/callback/" in cu

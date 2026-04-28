@@ -188,6 +188,34 @@ class Plan(BaseModel):
             out.append({**row, "icon_classes": fa})
         return out
 
+    def purchase_validity_summary(self) -> str:
+        """Quota-only validity text for purchase confirmation (mirrors quota_summary_badges, no billing/devices)."""
+        parts: list[str] = []
+        qt = self.quota_type
+
+        if qt == QuotaType.DURATION:
+            label = self.human_duration_badge_label()
+            if label:
+                parts.append(label)
+        elif qt == QuotaType.DATA:
+            label = self.human_data_badge_label()
+            if label:
+                parts.append(label)
+        elif qt == QuotaType.DURATION_AND_DATA:
+            dlabel = self.human_duration_badge_label()
+            if dlabel:
+                parts.append(dlabel)
+            dblabel = self.human_data_badge_label()
+            if dblabel:
+                parts.append(dblabel)
+        elif qt == QuotaType.UNLIMITED:
+            parts.append("Unlimited data")
+            dlabel = self.human_duration_badge_label()
+            if dlabel:
+                parts.append(dlabel)
+
+        return " · ".join(parts)
+
     def card_corner_icon(self) -> tuple[str, str]:
         """
         Font Awesome icon name (no fa- prefix) and style variant:

@@ -12,19 +12,25 @@
       </a>
       <nav class="hidden md:flex items-center gap-6" aria-label="Main">
         <a href="{% url 'portal:packages' %}" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Packages</a>
+        {% if not purchase_success_nav %}
         <a href="{% url 'home' %}" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Wi‑Fi login</a>
-        <a href="{% url 'portal:packages' %}#faq-section" class="text-sm font-medium text-textSecondary hover:text-primary transition-colors">Help</a>
+        {% endif %}
       </nav>
+      {% if not purchase_success_nav %}
       <div class="flex items-center gap-3">
         <a href="{% url 'home' %}" class="w-10 h-10 rounded-full bg-surfaceLight flex items-center justify-center hover:bg-border transition-colors" aria-label="Wi‑Fi login">
           <i class="fa-regular fa-user text-textSecondary" aria-hidden="true"></i>
         </a>
       </div>
+      {% else %}
+      <div class="w-10 h-10 md:hidden" aria-hidden="true"></div>
+      {% endif %}
     </div>
-    <nav class="md:hidden flex items-center justify-around gap-2 border-t border-borderLight py-3" aria-label="Mobile">
+    <nav class="md:hidden flex items-center {% if purchase_success_nav %}justify-center{% else %}justify-around{% endif %} gap-2 border-t border-borderLight py-3" aria-label="Mobile">
       <a href="{% url 'portal:packages' %}" class="text-sm font-semibold text-primary">Packages</a>
+      {% if not purchase_success_nav %}
       <a href="{% url 'home' %}" class="text-sm font-medium text-textSecondary">Login</a>
-      <a href="{% url 'portal:packages' %}#faq-section" class="text-sm font-medium text-textSecondary">Help</a>
+      {% endif %}
     </nav>
   </div>
 </header>

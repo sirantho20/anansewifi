@@ -9,7 +9,7 @@ ENV DJANGO_SETTINGS_MODULE=ananseWifi.settings
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends build-essential libpq-dev netcat-openbsd \
+    && apt-get install -y --no-install-recommends build-essential libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /app/requirements.txt
@@ -18,7 +18,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 COPY . /app
 
-RUN chmod +x /app/scripts/entrypoint.sh \
+RUN chmod +x /app/scripts/entrypoint.sh /app/scripts/wait_for_pg_tcp.py \
     && DJANGO_USE_SQLITE=1 python manage.py collectstatic --noinput \
     && rm -f /app/db.sqlite3
 

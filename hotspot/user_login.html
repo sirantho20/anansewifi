@@ -5,7 +5,7 @@
     <meta http-equiv="pragma" content="no-cache">
     <meta http-equiv="expires" content="-1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ananse WiFi — Sign in</title>
+    <title>Ananse WiFi — Account sign in</title>
     <style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{min-height:100%}
 body{
@@ -38,23 +38,22 @@ h1{font-size:1.15rem;font-weight:600;text-align:center;margin-bottom:1.25rem;col
 form{width:100%;text-align:center}
 .field{margin-bottom:1rem;text-align:left}
 .field label{display:block;font-size:.72rem;color:rgba(232,236,244,.55);margin-bottom:.25rem}
-#hs_code{
+input[type=text],input[type=password]{
   width:100%;height:48px;padding:0 14px;
   border-radius:10px;border:1px solid rgba(255,255,255,.18);
   background:rgba(0,0,0,.28);color:#fff;font-size:16px;
-  text-transform:uppercase;
   -webkit-appearance:none;appearance:none;
 }
-#hs_code::placeholder{color:rgba(232,236,244,.35)}
+input::placeholder{color:rgba(232,236,244,.35)}
 input[type=submit]{
   width:100%;max-width:280px;height:48px;margin-top:.5rem;border:none;border-radius:10px;
   font-size:16px;font-weight:600;cursor:pointer;color:#0c1220;
   background:linear-gradient(180deg,#f0c56c,#e8a435);
 }
-.buy{margin-top:1.25rem;font-size:.9rem;text-align:center}
+.buy{margin-top:1.25rem;font-size:.9rem}
 .buy a{color:#f0c56c;text-decoration:none;font-weight:500}
 .buy a:hover,.buy a:focus{text-decoration:underline}
-.alt{margin-top:.85rem;font-size:.88rem;text-align:center}
+.alt{margin-top:.85rem;font-size:.88rem}
 .alt a{color:#f0c56c;text-decoration:none;font-weight:500}
 .alt a:hover,.alt a:focus{text-decoration:underline}
 .foot{text-align:center;margin-top:1.5rem;font-size:.72rem;color:rgba(232,236,244,.38)}
@@ -219,29 +218,13 @@ function str2binl(str)
 function hexMD5 (str) { return binl2hex(coreMD5( str2binl(str))) }
 
         function doLogin() {
-            var c = document.getElementById('hs_code').value.toUpperCase();
-            document.sendin.username.value = c;
-            document.sendin.password.value = hexMD5('$(chap-id)' + c + '$(chap-challenge)');
+            document.sendin.username.value = document.login.username.value;
+            document.sendin.password.value = hexMD5('$(chap-id)' + document.login.password.value + '$(chap-challenge)');
             document.sendin.submit();
             return false;
         }
     </script>
 $(endif)
-    <script>
-        function hsCodeInput(el) {
-            var s = el.selectionStart, v = el.value.toUpperCase();
-            if (el.value !== v) {
-                el.value = v;
-                if (s != null) try { el.setSelectionRange(s, s); } catch (e) {}
-            }
-        }
-        function preparePap() {
-            var c = document.getElementById("hs_code").value.toUpperCase();
-            document.getElementById("hs_user").value = c;
-            document.getElementById("hs_pass").value = c;
-            return true;
-        }
-    </script>
 </head>
 <body>
 $(if chap-id)
@@ -261,25 +244,27 @@ $(endif)
 $(if error)
             <p class="msg msg-error" role="alert">$(error)</p>
 $(else)
-            <p class="msg">Enter your voucher code, then Log in to start browsing.</p>
+            <p class="msg">Sign in with the username and password you were given, then tap Log in.</p>
 $(endif)
 
-            <form name="login" action="$(link-login-only)" method="post" onSubmit="if (typeof doLogin === 'function' &amp;&amp; document.sendin) { return doLogin(); } return preparePap();">
+            <form name="login" action="$(link-login-only)" method="post" $(if chap-id)onSubmit="return doLogin()"$(endif)>
                 <input type="hidden" name="dst" value="$(link-orig)">
                 <input type="hidden" name="popup" value="true">
-                <input type="hidden" name="username" id="hs_user" value="$(username)">
-                <input type="hidden" name="password" id="hs_pass" value="">
 
                 <div class="field">
-                    <label for="hs_code">Voucher Code</label>
-                    <input id="hs_code" type="text" value="$(username)" maxlength="6" inputmode="text" autocapitalize="characters" autocomplete="username" placeholder="Voucher code" spellcheck="false" style="text-transform: uppercase" pattern="[A-Za-z0-9]{6}" title="6-character code" oninput="hsCodeInput(this)">
+                    <label for="hs_user">Username</label>
+                    <input id="hs_user" name="username" type="text" value="$(username)" placeholder="Username" autocomplete="username" autocapitalize="none" spellcheck="false">
+                </div>
+                <div class="field">
+                    <label for="hs_pass">Password</label>
+                    <input id="hs_pass" name="password" type="password" placeholder="Password" autocomplete="current-password">
                 </div>
                 <input type="submit" value="Log in">
             </form>
 
-            <p class="alt"><a href="user_login.html?dst=$(link-orig-esc)">User Login</a></p>
+            <p class="alt"><a href="login.html?dst=$(link-orig-esc)">Have a voucher code? Sign in with a code</a></p>
 
-            <p class="buy"><a href="https://anansewifi.shrt.fit/portal/plans/">Buy package</a></p>
+            <p class="buy"><a href="https://anansewifi.shrt.fit/portal/packages/">Buy package</a></p>
 
             <p class="foot">By connecting you agree to fair use.</p>
         </div>

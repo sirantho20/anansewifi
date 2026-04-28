@@ -127,9 +127,9 @@ class Command(BaseCommand):
         batch, _ = VoucherBatch.objects.get_or_create(
             name="Demo Batch",
             plan=plan,
-            defaults={"code_prefix": "ANW", "quantity": 3},
+            defaults={"code_prefix": "DEMO", "quantity": 3},
         )
-        for code in ("ANW-DEMO-001", "ANW-DEMO-002", "ANW-DEMO-003"):
+        for code in ("DEMO01", "DEMO02", "DEMO03"):
             Voucher.objects.get_or_create(
                 code=code,
                 defaults={

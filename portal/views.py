@@ -161,6 +161,16 @@ def purchase_start_view(request):
             },
         )
         return redirect(purchase.authorization_url)
+    except ValueError as exc:
+        messages.error(request, str(exc))
+        AuditLog.objects.create(
+            actor=mobile or "anonymous",
+            action="purchase_initialize_failed",
+            target_type="Plan",
+            target_id=plan_id or "unknown",
+            details={"error": str(exc), "full_name": full_name, "kind": "validation"},
+        )
+        return redirect("portal:packages")
     except Exception as exc:  # noqa: BLE001
         messages.error(request, f"Could not start payment: {exc}")
         AuditLog.objects.create(
@@ -213,7 +223,7 @@ def purchase_callback_view(request):
             "voucher": result.voucher,
             "sms_sent": result.sms_sent,
             "sms_error": result.sms_error,
-            "login_identity": result.customer.phone or result.customer.username,
             "site_title": _portal_site_title(),
+            "purchase_success_nav": True,
         },
     )

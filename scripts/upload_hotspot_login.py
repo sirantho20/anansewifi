@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Upload hotspot/login.html to MikroTik flash/hotspot/ for the captive portal (no /import)."""
+"""Upload hotspot/login.html and user_login.html to MikroTik flash/hotspot/ (no /import)."""
 
 from __future__ import annotations
 
@@ -24,11 +24,13 @@ def main() -> int:
         return 1
 
     login_html = REPO / "hotspot" / "login.html"
+    user_login_html = REPO / "hotspot" / "user_login.html"
     if not login_html.is_file():
         print(f"Missing {login_html}", file=sys.stderr)
         return 1
-
-    remote_path = "flash/hotspot/login.html"
+    if not user_login_html.is_file():
+        print(f"Missing {user_login_html}", file=sys.stderr)
+        return 1
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(
@@ -47,10 +49,12 @@ def main() -> int:
                 sftp.mkdir("flash/hotspot")
             except OSError:
                 pass
-            sftp.put(str(login_html), remote_path)
+            sftp.put(str(login_html), "flash/hotspot/login.html")
+            sftp.put(str(user_login_html), "flash/hotspot/user_login.html")
         finally:
             sftp.close()
-        print(f"Uploaded {login_html.name} -> {host}:{remote_path}")
+        print(f"Uploaded {login_html.name} -> {host}:flash/hotspot/login.html")
+        print(f"Uploaded {user_login_html.name} -> {host}:flash/hotspot/user_login.html")
         return 0
     finally:
         client.close()

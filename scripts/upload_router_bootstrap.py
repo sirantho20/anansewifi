@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Upload router_bootstrap_lab.rsc + hotspot/login.html to MikroTik and run /import."""
+"""Upload router_bootstrap_lab.rsc + hotspot login pages to MikroTik and run /import."""
 
 from __future__ import annotations
 
@@ -24,6 +24,7 @@ def main() -> None:
 
     rsc = REPO / "router_bootstrap_lab.rsc"
     login_html = REPO / "hotspot" / "login.html"
+    user_login_html = REPO / "hotspot" / "user_login.html"
     if not rsc.is_file():
         sys.exit(f"Missing {rsc}")
 
@@ -48,6 +49,8 @@ def main() -> None:
                 except OSError:
                     pass
                 sftp.put(str(login_html), "flash/hotspot/login.html")
+                if user_login_html.is_file():
+                    sftp.put(str(user_login_html), "flash/hotspot/user_login.html")
         finally:
             sftp.close()
 

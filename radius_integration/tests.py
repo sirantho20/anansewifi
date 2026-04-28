@@ -71,7 +71,7 @@ class RadiusProjectionTests(TestCase):
         )
         customer = Customer.objects.create(username="dup-user", full_name="Dup User")
         voucher = Voucher.objects.create(
-            code="ANW-DUP-RAD-001",
+            code="RAD001",
             plan=plan,
             status=VoucherStatus.REDEEMED,
             redeemed_by=customer,

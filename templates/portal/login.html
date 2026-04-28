@@ -9,13 +9,9 @@
   {% include "portal/includes/plans_messages.html" %}
 
   <div class="max-w-xl mx-auto">
-    <div class="mb-6 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-textSecondary" role="note">
-      <p class="font-medium text-textPrimary mb-1">On the Ananse Wi‑Fi network?</p>
-      <p class="leading-relaxed">Use the forms below, then open the <strong>hotspot sign-in page</strong> on the router to get online: <a href="http://login.hotspot/login" class="text-primary font-medium underline">http://login.hotspot/login</a>. Enter the same username and password you use for Wi‑Fi (often your voucher code).</p>
-    </div>
     <div class="text-center mb-8">
       <h2 class="text-2xl lg:text-3xl font-bold text-textPrimary mb-2">Connect to Wi‑Fi</h2>
-      <p class="text-textSecondary text-sm lg:text-base leading-relaxed mb-6">Tap <strong>Log in</strong> to redeem your voucher or sign in with your hotspot password. Need a package? Use the link below to buy and get your code by SMS.</p>
+      <p class="text-textSecondary text-sm lg:text-base leading-relaxed mb-6">Tap <strong>Log in</strong> to redeem a voucher or sign in with your hotspot username and password.</p>
       <div id="portal-login-step1" class="{% if reveal_login_forms %}hidden{% endif %}">
         <button
           type="button"
@@ -41,10 +37,15 @@
               id="id-voucher"
               type="text"
               name="voucher_code"
+              maxlength="6"
               required
               autocomplete="one-time-code"
+              autocapitalize="characters"
               class="w-full rounded-lg border border-border bg-white px-4 py-3 text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              style="text-transform: uppercase"
               placeholder="Enter your voucher"
+              pattern="[A-Za-z0-9]{6}"
+              title="6-character code"
             >
           </div>
           <button type="submit" class="w-full min-h-[52px] rounded-xl bg-primary text-white font-semibold text-base hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors">
@@ -53,9 +54,8 @@
         </form>
       </div>
 
-      <div class="bg-white rounded-2xl border border-borderLight shadow-sm p-6 lg:p-8">
-        <h3 class="text-lg font-semibold text-textPrimary mb-1">Sign in with username and password</h3>
-        <p class="text-textTertiary text-sm mb-4">Use the same Wi‑Fi login and password you use on the hotspot. If you are not sure, redeem your voucher above—your password is then usually your voucher code.</p>
+      <div class="bg-white rounded-2xl border border-borderLight shadow-sm p-6 lg:p-8 max-w-sm mx-auto w-full">
+        <h3 class="text-lg font-semibold text-textPrimary mb-4 text-center">Sign in with username and password</h3>
         <form method="post" class="space-y-5" novalidate>
           {% csrf_token %}
           <input type="hidden" name="auth_mode" value="password">
@@ -91,12 +91,11 @@
       </div>
     </div>
 
-    <div class="mt-6 space-y-3">
+    <div class="mt-6 max-w-sm mx-auto w-full">
       <a href="{% url 'portal:packages' %}" class="w-full min-h-[52px] inline-flex items-center justify-center gap-2 rounded-xl border-2 border-primary bg-white text-primary font-semibold text-base hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors">
         <i class="fa-solid fa-box-open" aria-hidden="true"></i>
         View packages and buy
       </a>
-      <p class="text-center text-textTertiary text-xs leading-relaxed">Pay securely, get your voucher by SMS, then return here to connect.</p>
     </div>
   </div>
 </main>
@@ -128,5 +127,4 @@
 })();
 </script>
 
-{% include "portal/includes/plans_footer.html" %}
 {% endblock %}

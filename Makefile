@@ -54,6 +54,6 @@ radius-sanity:
 	@curl -sS -o /dev/null -w "HTTPS anansewifi.shrt.fit/portal/login/ -> %{http_code}\n" --max-time 15 https://anansewifi.shrt.fit/portal/login/ || true
 	@python3 scripts/radius_endpoint_info.py
 
-# Requires `make up` with the radius service running. Seeds user must exist (make seed) for demo-customer / ANW-DEMO-001.
+# Requires `make up` with the radius service running. Seeds user must exist (make seed) for demo-customer / DEMO01.
 radius-test-local:
-	docker compose exec -T radius radtest demo-customer ANW-DEMO-001 127.0.0.1 0 ananse-radius-secret
+	docker compose exec -T radius radtest demo-customer DEMO01 127.0.0.1 0 ananse-radius-secret

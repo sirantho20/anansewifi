@@ -38,7 +38,7 @@ Django business models are the source of truth. A projection layer syncs RADIUS-
 ## Simulating CHR requests in development
 
 - auth simulation:
-  - `docker compose exec radius radtest demo-customer ANW-DEMO-001 127.0.0.1 0 ananse-radius-secret`
+  - `docker compose exec radius radtest demo-customer DEMO01 127.0.0.1 0 ananse-radius-secret`
 - accounting simulation:
   - `docker compose exec radius radclient -x 127.0.0.1:1813 acct ananse-radius-secret <<'EOF'\nUser-Name = \"demo-customer\"\nAcct-Status-Type = Interim-Update\nAcct-Session-Id = \"sim-1\"\nAcct-Unique-Session-Id = \"sim-1-unique\"\nNAS-IP-Address = 172.20.20.1\nCalling-Station-Id = \"AA-BB-CC-DD-EE-FF\"\nFramed-IP-Address = 10.10.10.10\nAcct-Input-Octets = 1024\nAcct-Output-Octets = 2048\nAcct-Session-Time = 120\nEOF`
   - then trigger sync window (or wait for beat schedule interval)

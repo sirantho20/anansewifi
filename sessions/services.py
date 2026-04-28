@@ -2,6 +2,7 @@ from django.db import transaction
 
 from customers.models import Customer
 from network.models import NASDevice
+from vouchers.codes import normalize_voucher_code
 from vouchers.models import Voucher
 
 from .models import AccountingRecord, Session
@@ -28,7 +29,9 @@ def ingest_accounting_event(payload: dict) -> AccountingRecord:
         customer = Customer.objects.filter(username=un).first()
         if not customer:
             voucher = (
-                Voucher.objects.filter(code=un).select_related("redeemed_by").first()
+                Voucher.objects.filter(code=normalize_voucher_code(un))
+                .select_related("redeemed_by")
+                .first()
             )
             if voucher and voucher.redeemed_by_id:
                 customer = voucher.redeemed_by

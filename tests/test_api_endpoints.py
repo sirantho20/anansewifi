@@ -1,3 +1,5 @@
+import re
+
 import pytest
 from unittest.mock import patch
 from rest_framework.test import APIClient
@@ -82,4 +84,6 @@ def test_purchase_verify_api_returns_voucher_code(mock_verify, mock_send_sms):
 
     assert response.status_code == 200
     assert response.data["status"] == "success"
-    assert response.data["voucher_code"].startswith("ANW-PUR-")
+    code = response.data["voucher_code"]
+    assert len(code) == 6
+    assert re.fullmatch(r"[A-Z0-9]{6}", code)
