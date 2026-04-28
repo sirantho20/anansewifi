@@ -241,6 +241,24 @@ $(endif)
             document.getElementById("hs_pass").value = c;
             return true;
         }
+        function buyPackageExternal(ev) {
+            var el = ev.currentTarget;
+            var url = el.getAttribute("href");
+            if (!url) return true;
+            var ua = navigator.userAgent || "";
+            if (!/Android/i.test(ua)) return true;
+            ev.preventDefault();
+            try {
+                var u = document.createElement("a");
+                u.href = url;
+                var hostPath = u.host + u.pathname + u.search + u.hash;
+                var intent = "intent://" + hostPath + "#Intent;scheme=https;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;S.browser_fallback_url=" + encodeURIComponent(url) + ";end";
+                window.location.href = intent;
+            } catch (e) {
+                window.open(url, "_blank");
+            }
+            return false;
+        }
     </script>
 </head>
 <body>
@@ -279,7 +297,7 @@ $(endif)
 
             <p class="alt"><a href="user_login.html?dst=$(link-orig-esc)">User Login</a></p>
 
-            <p class="buy"><a href="https://anansewifi.shrt.fit/portal/plans/">Buy package</a></p>
+            <p class="buy"><a href="https://anansewifi.shrt.fit/portal/plans/" target="_blank" rel="noopener noreferrer" onclick="return buyPackageExternal(event)">Buy package</a></p>
 
             <p class="foot">By connecting you agree to fair use.</p>
         </div>

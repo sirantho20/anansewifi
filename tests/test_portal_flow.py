@@ -2,6 +2,8 @@ import pytest
 from types import SimpleNamespace
 from unittest.mock import patch
 
+from django.test import override_settings
+
 from payments.models import Payment, PaymentStatus
 from plans.models import Plan, SpeedProfile
 from radius_integration.services import sync_entitlement_to_radius
@@ -193,7 +195,54 @@ def test_portal_purchase_start_invalid_mobile_shows_validation_error(client):
 
 @pytest.mark.django_db
 @patch("portal.views.initialize_plan_purchase")
-def test_portal_purchase_start_redirects_to_paystack_checkout(mock_initialize_plan_purchase, client):
+def test_portal_purchase_start_shows_paystack_interstitial(mock_initialize_plan_purchase, client):
+    customer = CustomerFactory(phone="+233241234588")
+    plan = Plan.objects.create(
+        name="Checkout Redirect Plan",
+        price="5.00",
+        billing_type="voucher",
+        quota_type="duration",
+        duration_minutes=60,
+        is_active=True,
+    )
+    mock_initialize_plan_purchase.return_value = SimpleNamespace(
+        customer=customer,
+        payment=SimpleNamespace(id=1001),
+        authorization_url="https://checkout.paystack.com/mock-verify-path",
+        access_code="mock_access_code",
+        reference="mock-ref-portal-flow",
+    )
+
+    response = client.post(
+        "/portal/purchase/start/",
+        {
+            "plan_id": str(plan.id),
+            "full_name": "Paid Customer",
+            "mobile": "0241555888",
+        },
+        follow=False,
+        HTTP_HOST="127.0.0.1:18080",
+    )
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "Continue to Paystack" in content
+    assert 'href="https://checkout.paystack.com/mock-verify-path"' in content
+    assert "Checkout Redirect Plan" in content
+    mock_initialize_plan_purchase.assert_called_once()
+    kwargs = mock_initialize_plan_purchase.call_args.kwargs
+    cu = kwargs.get("callback_url", "")
+    assert cu.startswith("http://127.0.0.1:18080"), (
+        "Paystack callback must use the bound host:port so browsers do not GET port 80. "
+        f"Got callback_url={cu!r}"
+    )
+    assert "/portal/purchase/callback/" in cu
+
+
+@pytest.mark.django_db
+@override_settings(PURCHASE_CHECKOUT_REDIRECT_DIRECT=True)
+@patch("portal.views.initialize_plan_purchase")
+def test_portal_purchase_start_redirects_to_paystack_checkout_when_direct_flag(mock_initialize_plan_purchase, client):
     customer = CustomerFactory(phone="+233241234588")
     plan = Plan.objects.create(
         name="Checkout Redirect Plan",

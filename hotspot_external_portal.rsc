@@ -1,6 +1,10 @@
 # Walled garden: allow HTTPS to the public Ananse portal and Paystack (*.paystack.com / *.paystack.co)
 # before Hotspot login (plan purchase redirects to hosted checkout).
 #
+# Verification (before testing Buy Plan on a phone):
+# - /ip hotspot walled-garden ip print — rows for portal FQDN + paystack.com/*.paystack.com/etc.
+# - /ip proxy print — not inactivated; device-mode must have proxy=yes or rules do not apply (config.txt §14)
+#
 # Prerequisites (see config.txt §14–15): device-mode proxy=yes (enable_proxy_device_mode.rsc + reboot),
 # /interface bridge settings set [find name=bridge-main] use-ip-firewall=yes, working DNS for guests.
 #

@@ -160,7 +160,17 @@ def purchase_start_view(request):
                 "reference": purchase.reference,
             },
         )
-        return redirect(purchase.authorization_url)
+        if settings.PURCHASE_CHECKOUT_REDIRECT_DIRECT:
+            return redirect(purchase.authorization_url)
+        return render(
+            request,
+            "portal/purchase_checkout.html",
+            {
+                "authorization_url": purchase.authorization_url,
+                "plan": plan,
+                "site_title": _portal_site_title(),
+            },
+        )
     except ValueError as exc:
         messages.error(request, str(exc))
         AuditLog.objects.create(

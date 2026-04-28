@@ -215,6 +215,10 @@ PAYSTACK_CALLBACK_URL = os.getenv(
 )
 PAYMENT_CURRENCY = os.getenv("PAYMENT_CURRENCY", "GHS")
 
+# Captive browser compatibility: default is an interstitial page with a user-tapped link to Paystack (see portal views).
+# Set PURCHASE_CHECKOUT_REDIRECT_DIRECT=1 to restore immediate HTTP redirect after initialize (e.g. automated tests).
+PURCHASE_CHECKOUT_REDIRECT_DIRECT = os.getenv("PURCHASE_CHECKOUT_REDIRECT_DIRECT", "0") == "1"
+
 HUBTEL_CLIENT_ID = os.getenv("HUBTEL_CLIENT_ID", "")
 HUBTEL_CLIENT_SECRET = os.getenv("HUBTEL_CLIENT_SECRET", "")
 HUBTEL_SENDER_ID = os.getenv("HUBTEL_SENDER_ID", "AnanseWiFi")

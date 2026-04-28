@@ -1,0 +1,33 @@
+{% extends "portal/base_portal.html" %}
+
+{% block title %}{{ site_title }} — Continue to payment{% endblock %}
+
+{% block content %}
+{% include "portal/includes/plans_header.html" %}
+
+<main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+  {% include "portal/includes/plans_messages.html" %}
+
+  <div class="max-w-xl mx-auto text-center">
+    <h2 class="text-2xl lg:text-3xl font-bold text-textPrimary mb-4">Continue to payment</h2>
+    <p class="text-textSecondary text-sm lg:text-base mb-8 leading-relaxed">
+      Your package: <span class="font-medium text-textPrimary">{{ plan.name }}</span>.
+      Tap the button below to open the secure Paystack page. If the captive Wi‑Fi browser shows an error, turn off Wi‑Fi temporarily or use mobile data, then open this same site and try again.
+    </p>
+
+    <div class="bg-white rounded-2xl border border-borderLight shadow-sm p-6 lg:p-8 flex flex-col items-center gap-6">
+      <a
+        href="{{ authorization_url }}"
+        rel="noopener noreferrer"
+        class="inline-flex w-full min-h-[52px] max-w-md items-center justify-center rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
+      >
+        <i class="fa-solid fa-lock mr-2" aria-hidden="true"></i>
+        Continue to Paystack
+      </a>
+      <p class="text-xs text-textTertiary max-w-md leading-relaxed">
+        Payments are processed by Paystack; you will return here after completing or cancelling the payment where supported.
+      </p>
+    </div>
+  </div>
+</main>
+{% endblock %}
