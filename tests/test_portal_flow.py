@@ -228,6 +228,10 @@ def test_portal_purchase_start_shows_paystack_interstitial(mock_initialize_plan_
     content = response.content.decode()
     assert "Continue to Paystack" in content
     assert 'href="https://checkout.paystack.com/mock-verify-path"' in content
+    assert 'target="_blank"' in content
+    assert "data-paystack-external" in content
+    assert "openPaystackExternal(event)" in content
+    assert "intent://\" + hostPath" in content
     assert "Checkout Redirect Plan" in content
     mock_initialize_plan_purchase.assert_called_once()
     kwargs = mock_initialize_plan_purchase.call_args.kwargs

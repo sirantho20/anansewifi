@@ -116,13 +116,17 @@
   /ip hotspot add name=hotspot-main interface=bridge-main profile=cp-main address-pool=ananse-pool-main disabled=no
 }
 
-# ---- 11) Walled garden: HTTPS to public portal (login.html redirect) before auth ----
+# ---- 11) Walled garden: HTTPS to public portal + Paystack (checkout.paystack.com + wildcards) before auth ----
 :if ([:len [/ip hotspot walled-garden ip find dst-host="anansewifi.shrt.fit"]] = 0) do={
   /ip hotspot walled-garden ip add dst-host=anansewifi.shrt.fit comment="Ananse external portal (HTTPS pre-login)"
 }
 
 :if ([:len [/ip hotspot walled-garden ip find dst-host="paystack.com"]] = 0) do={
   /ip hotspot walled-garden ip add dst-host=paystack.com comment="Paystack apex .com (HTTPS pre-login)"
+}
+
+:if ([:len [/ip hotspot walled-garden ip find dst-host="checkout.paystack.com"]] = 0) do={
+  /ip hotspot walled-garden ip add dst-host=checkout.paystack.com comment="Paystack hosted checkout (HTTPS pre-login)"
 }
 
 :if ([:len [/ip hotspot walled-garden ip find dst-host="*.paystack.com"]] = 0) do={
